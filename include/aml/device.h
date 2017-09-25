@@ -24,6 +24,7 @@ enum Device { CPU };
       default: abort(); \
     } \
   } while (0)
+
 #endif
 
 }  // namespace aml
