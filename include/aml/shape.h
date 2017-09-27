@@ -9,11 +9,13 @@ namespace aml {
 template <Index Dim>
 class Shape {
 public:
+  AML_HOST_DEVICE Shape() : dims_() { }
+
   template <typename IndexCastable>
   AML_HOST_DEVICE Shape(std::initializer_list<IndexCastable> dims) {
     Index i = Index(0);
     for (auto dim : dims) {
-      dims_[i++] = dim;
+      dims_[i++] = static_cast<Index>(dim);
     }
   }
 
@@ -27,10 +29,12 @@ public:
     return dims_[i];
   }
 
+  Index size() const {
+    return Dim;
+  }
 
 private:
   Index dims_[Dim];
-
 };
 
 }  // namespace aml
