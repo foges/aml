@@ -33,9 +33,27 @@ public:
     return Dim;
   }
 
+  bool operator==(const Shape<Dim> &rhs) const {
+    for (Index i = 0; i < Dim; ++i) {
+      if ((*this)[i] != rhs[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool operator!=(const Shape<Dim> &rhs) const {
+    return !(*this == rhs);
+  }
+
 private:
   Index dims_[Dim];
 };
+
+template <class... T>
+Shape<sizeof...(T)> make_shape(T&&... idx) {
+  return { std::forward<Index>(idx)... };
+}
 
 }  // namespace aml
 
