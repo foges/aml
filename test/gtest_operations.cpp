@@ -126,4 +126,15 @@ TEST(OperationsTest, UnaryOpAbs) {
   EXPECT_EQ(a.data()[3], 9);
 }
 
-
+TEST(OperationsTest, BinaryOpMax) {
+  std::vector<int> data1 = {4, 5, 3, 9};
+  std::vector<int> data2 = {8, 4, 1, 7};
+  auto in1 = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
+  auto in2 = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
+  auto out = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 2, 1));
+  aml::binary_op(aml::make_const(in1), aml::make_const(in2), out, aml::Max());
+  EXPECT_EQ(out.data()[0], 8);
+  EXPECT_EQ(out.data()[1], 5);
+  EXPECT_EQ(out.data()[2], 3);
+  EXPECT_EQ(out.data()[3], 9);
+}

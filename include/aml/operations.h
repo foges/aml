@@ -46,5 +46,20 @@ void unary_op(const ConstArray<Tin, Dim> &in,
   AML_DEVICE_EVAL(in.device(), unary_op(in, out, op));
 }
 
+template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
+void binary_op(const ConstArray<Tin1, Dim> &in1,
+               const ConstArray<Tin2, Dim> &in2,
+               Array<Tout, Dim> &out,
+               const Op &op) {
+  Device device = in1.device();
+  Shape<Dim> shape = in1.shape();
+
+  AML_ASSERT(device == in2.device() && device == out.device(),
+      "Device mismatch");
+  AML_ASSERT(shape == in2.shape() && shape == out.shape(), "Shape mismatch");
+
+  AML_DEVICE_EVAL(device, binary_op(in1, in2, out, op));
+}
+
 }  // namespace aml
 
