@@ -1,10 +1,9 @@
 #pragma once
 
-#include <algorithm>
 #include <memory>
-#include <vector>
 
 #include <aml/allocation.h>
+#include <aml/array.h>
 #include <aml/defs.h>
 #include <aml/device.h>
 #include <aml/impl/shape.h>
@@ -13,27 +12,26 @@
 namespace aml {
 
 template <typename T, int Dim>
-class Array {
+class ConstArray {
 public:
-  Array(Device device, const Shape<Dim> &shape)
-      : allocation_(new Allocation(device, sizeof(T) * shape.numel())),
-        data_(static_cast<T*>(allocation_->data())),
-        shape_(shape),
-        stride_(impl::strides(shape)){ }
-
-  Array(const std::shared_ptr<Allocation> &allocation,
-        T *data,
-        const Shape<Dim> &shape,
-        const Shape<Dim> &stride)
+  ConstArray(std::shared_ptr<const Allocation> allocation,
+             const T *data,
+             Shape<Dim> shape,
+             Shape<Dim> stride)
       : allocation_(allocation),
         data_(data),
         shape_(shape),
         stride_(stride) { }
 
-  Array() : data_(nullptr), shape_(), stride_(impl::strides(shape_)) { }
+  ConstArray(const Array<T, Dim> &array)
+      : ConstArray(array.allocation(),
+                   array.data(),
+                   array.shape(),
+                   array.stride()) { }
+
+  ConstArray() : data_(nullptr), shape_(), stride_(impl::strides(shape_)) { }
 
   Device device() const {
-    AML_DEBUG_ASSERT(allocation_ != nullptr);
     return allocation_->device();
   }
 
@@ -41,15 +39,7 @@ public:
     return allocation_;
   }
 
-  std::shared_ptr<Allocation> allocation() {
-    return allocation_;
-  }
-
   const T* data() const {
-    return data_;
-  }
-
-  T* data() {
     return data_;
   }
 
@@ -66,37 +56,34 @@ public:
   }
 
 private:
-  std::shared_ptr<Allocation> allocation_;
+  std::shared_ptr<const Allocation> allocation_;
 
-  T *data_;
+  T const *data_;
 
   Shape<Dim> shape_;
   Shape<Dim> stride_;
 };
 
 template <typename T>
-using Vector = Array<T, 1>;
+using ConstVector = ConstArray<T, 1>;
 
 template <typename T>
-using Matrix = Array<T, 2>;
+using ConstMatrix = ConstArray<T, 2>;
 
 template <typename T, int Dim>
-Array<T, Dim> make_array(const std::vector<T> data, const Shape<Dim> &shape) {
-  AML_ASSERT(data.size() == shape.numel(), "Number of elements must match");
-
-  Array<T, Dim> array(aml::CPU, shape);
-  std::copy(data.begin(), data.end(), array.data());
-
+ConstArray<T, Dim> make_const(const aml::Array<T, Dim> &array) {
   return array;
 }
 
 template <typename T, int Dim>
-Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
+ConstArray<T, Dim> slice(const ConstArray<T, Dim> &array,
+                         const Shape<Dim> &begin,
+                         const Shape<Dim> &end) {
   AML_ASSERT(begin <= array.shape(), "Cannot slice outside of array");
   AML_ASSERT(end <= array.shape(), "Cannot slice outside of array");
   AML_ASSERT(begin <= end, "Slice begin must come before end");
 
-  return Array<T, Dim>(
+  return ConstArray<T, Dim>(
       array.allocation(),
       array.data() + impl::dot(begin, array.stride()),
       impl::diff(end, begin),
@@ -104,13 +91,14 @@ Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
 }
 
 template <typename T, int DimOld, int DimNew>
-Array<T, DimNew> reshape(Array<T, DimOld> array, Shape<DimNew> shape) {
+ConstArray<T, DimNew> reshape(const ConstArray<T, DimOld> &array,
+                              const Shape<DimNew> &shape) {
   AML_ASSERT(array.shape().numel() == shape.numel(),
       "Reshape must keep the same number of elements");
   AML_ASSERT(array.is_contiguous(),
       "Cannot reshape non-contiguous arrays");
 
-  return Array<T, DimNew>(
+  return ConstArray<T, DimNew>(
       array.allocation(),
       array.data(),
       shape,

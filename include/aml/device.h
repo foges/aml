@@ -6,11 +6,11 @@ namespace aml {
 enum Device { CPU, GPU };
 
 #define AML_DEVICE_EVAL(device, function) \
-  [&]() -> decltype(cpu::function) { \
+  [&]() -> decltype(::aml::impl::cpu::function) { \
     do { \
       switch ((device)) { \
-        case aml::GPU: return (gpu::function); \
-        case aml::CPU: return (cpu::function); \
+        case aml::GPU: return (::aml::impl::gpu::function); \
+        case aml::CPU: return (::aml::impl::cpu::function); \
         default: abort(); \
       } \
     } while(0); \
@@ -20,10 +20,10 @@ enum Device { CPU, GPU };
 enum Device { CPU };
 
 #define AML_DEVICE_EVAL(device, function) \
-  [&]() -> decltype(cpu::function) { \
+  [&]() -> decltype(::aml::impl::cpu::function) { \
     do { \
       switch ((device)) { \
-        case aml::CPU: return (cpu::function); \
+        case aml::CPU: return (::aml::impl::cpu::function); \
         default: abort(); \
       } \
     } while(0); \
