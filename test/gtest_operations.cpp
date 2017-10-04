@@ -4,109 +4,97 @@
 
 #include <aml/aml.h>
 
-std::vector<float> Af   = {-1.0f,  2.0f,  3.0f,  -5.0f};
-std::vector<float> Bf   = { 1.0f, -1.0f, -2.0f,   2.0f};
-std::vector<float> CNNf = {-4.0f,  7.0f,  8.0f, -14.0f};
-std::vector<float> CTNf = {-3.0f,  8.0f,  6.0f, -16.0f};
-std::vector<float> CNTf = {-7.0f, 12.0f,  7.0f, -12.0f};
-std::vector<float> CTTf = {-5.0f, 13.0f,  5.0f, -13.0f};
+std::vector<float> Afl  = {-1.0f,  2.0f,  3.0f,  -5.0f};
+std::vector<float> Bfl  = { 1.0f, -1.0f, -2.0f,   2.0f};
 
-class GemmTestFloat : public ::testing::Test {
+std::vector<double> Ado  = {-1.0,  2.0,  3.0,  -5.0};
+std::vector<double> Bdo  = { 1.0, -1.0, -2.0,   2.0};
+
+std::vector<double> CNN = {-4.0,  7.0,  8.0, -14.0};
+std::vector<double> CTN = {-3.0,  8.0,  6.0, -16.0};
+std::vector<double> CNT = {-7.0, 12.0,  7.0, -12.0};
+std::vector<double> CTT = {-5.0, 13.0,  5.0, -13.0};
+
+class GemmTest : public ::testing::Test {
 public:
-  GemmTestFloat() {
-    A = aml::make_array(Af, aml::make_shape(2, 2));
-    B = aml::make_array(Bf, aml::make_shape(2, 2));
+  GemmTest() {
+    size = 4;
+    Af = aml::make_array(Afl, aml::make_shape(2, 2));
+    Bf = aml::make_array(Bfl, aml::make_shape(2, 2));
+    Ad = aml::make_array(Ado, aml::make_shape(2, 2));
+    Bd = aml::make_array(Bdo, aml::make_shape(2, 2));
   }
 
 protected:
   virtual void SetUp() {
-    std::vector<float> data = {0.0f, 0.0f, 0.0f, 0.0f};
-    C = aml::make_array(data, aml::make_shape(2, 2));
+    std::vector<float> data_f = {0.0f, 0.0f, 0.0f, 0.0f};
+    std::vector<double> data_d = {0.0, 0.0, 0.0, 0.0};
+    Cf = aml::make_array(data_f, aml::make_shape(2, 2));
+    Cd = aml::make_array(data_d, aml::make_shape(2, 2));
   }
 
-  aml::ConstMatrix<float> A;
-  aml::ConstMatrix<float> B;
-  aml::Matrix<float> C;
+  size_t size;
+  aml::ConstMatrix<float> Af;
+  aml::ConstMatrix<float> Bf;
+  aml::Matrix<float> Cf;
+  aml::ConstMatrix<double> Ad;
+  aml::ConstMatrix<double> Bd;
+  aml::Matrix<double> Cd;
 };
 
-TEST_F(GemmTestFloat, NN) {
-  aml::gemm(aml::NO_TRANS, aml::NO_TRANS, 1.0f, A, B, 0.0f, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CNNf[i]);
+TEST_F(GemmTest, FloatNN) {
+  aml::gemm(aml::NO_TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cf.data()[i], CNN[i]);
   }
 }
 
-TEST_F(GemmTestFloat, TN) {
-  aml::gemm(aml::TRANS, aml::NO_TRANS, 1.0f, A, B, 0.0f, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CTNf[i]);
+TEST_F(GemmTest, FloatTN) {
+  aml::gemm(aml::TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cf.data()[i], CTN[i]);
   }
 }
 
-TEST_F(GemmTestFloat, NT) {
-  aml::gemm(aml::NO_TRANS, aml::TRANS, 1.0f, A, B, 0.0f, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CNTf[i]);
+TEST_F(GemmTest, FloatNT) {
+  aml::gemm(aml::NO_TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cf.data()[i], CNT[i]);
   }
 }
 
-TEST_F(GemmTestFloat, TT) {
-  aml::gemm(aml::TRANS, aml::TRANS, 1.0f, A, B, 0.0f, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CTTf[i]);
+TEST_F(GemmTest, FloatTT) {
+  aml::gemm(aml::TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cf.data()[i], CTT[i]);
   }
 }
 
-std::vector<double> Ad   = {-1.0,  2.0,  3.0,  -5.0};
-std::vector<double> Bd   = { 1.0, -1.0, -2.0,   2.0};
-std::vector<double> CNNd = {-4.0,  7.0,  8.0, -14.0};
-std::vector<double> CTNd = {-3.0,  8.0,  6.0, -16.0};
-std::vector<double> CNTd = {-7.0, 12.0,  7.0, -12.0};
-std::vector<double> CTTd = {-5.0, 13.0,  5.0, -13.0};
-
-class GemmTestDouble : public ::testing::Test {
-public:
-  GemmTestDouble() {
-    A = aml::make_array(Ad, aml::make_shape(2, 2));
-    B = aml::make_array(Bd, aml::make_shape(2, 2));
-  }
-
-protected:
-  virtual void SetUp() {
-    std::vector<double> data = {0.0, 0.0, 0.0, 0.0};
-    C = aml::make_array(data, aml::make_shape(2, 2));
-  }
-
-  aml::ConstMatrix<double> A;
-  aml::ConstMatrix<double> B;
-  aml::Matrix<double> C;
-};
-
-TEST_F(GemmTestDouble, NN) {
-  aml::gemm(aml::NO_TRANS, aml::NO_TRANS, 1.0, A, B, 0.0, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CNNd[i]);
+TEST_F(GemmTest, DoubleNN) {
+  aml::gemm(aml::NO_TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cd.data()[i], CNN[i]);
   }
 }
 
-TEST_F(GemmTestDouble, TN) {
-  aml::gemm(aml::TRANS, aml::NO_TRANS, 1.0, A, B, 0.0, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CTNd[i]);
+TEST_F(GemmTest, DoubleTN) {
+  aml::gemm(aml::TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cd.data()[i], CTN[i]);
   }
 }
 
-TEST_F(GemmTestDouble, NT) {
-  aml::gemm(aml::NO_TRANS, aml::TRANS, 1.0, A, B, 0.0, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CNTd[i]);
+TEST_F(GemmTest, DoubleNT) {
+  aml::gemm(aml::NO_TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cd.data()[i], CNT[i]);
   }
 }
 
-TEST_F(GemmTestDouble, TT) {
-  aml::gemm(aml::TRANS, aml::TRANS, 1.0, A, B, 0.0, C);
-  for (size_t i = 0; i < Af.size(); ++i) {
-    EXPECT_EQ(C.data()[i], CTTd[i]);
+TEST_F(GemmTest, DoubleTT) {
+  aml::gemm(aml::TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  for (size_t i = 0; i < size; ++i) {
+    EXPECT_EQ(Cd.data()[i], CTT[i]);
   }
 }
 
@@ -140,8 +128,8 @@ TEST(OperationsTest, BinaryOpMax) {
 }
 
 TEST(OperationsTest, BinaryOpMaxSlice) {
-  std::vector<int> data1 = {4, 5, 3, 9};
-  std::vector<int> data2 = {8, 4, 1, 7};
+  std::vector<int> data1 = {4, 5, 3, 7};
+  std::vector<int> data2 = {8, 4, 1, 9};
   auto in1 = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
   auto in2 = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
   auto in1s = aml::slice(in1, aml::make_shape(0, 1, 0, 0),
@@ -149,8 +137,7 @@ TEST(OperationsTest, BinaryOpMaxSlice) {
   auto in2s = aml::slice(in2, aml::make_shape(0, 1, 0, 0),
       aml::make_shape(1, 2, 2, 1));
   auto out = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 1, 2, 1));
-  aml::binary_op(aml::make_const(in1s1), aml::make_const(in2s), out,
-      aml::Max());
+  aml::binary_op(aml::make_const(in1s), aml::make_const(in2s), out, aml::Max());
   EXPECT_EQ(out.data()[0], 5);
   EXPECT_EQ(out.data()[1], 9);
 }
