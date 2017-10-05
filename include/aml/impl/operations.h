@@ -64,8 +64,7 @@ void set(T *out,
          const Shape<Dim> &shape,
          const T &val) {
   for (Index i = 0; i < shape.head(); ++i) {
-    set(out, stride.tail(), shape.tail(), val);
-    out += stride.head();
+    set(out + i * stride.head(), stride.tail(), shape.tail(), val);
   }
 }
 
@@ -94,9 +93,9 @@ void unary_op(const Tin *in,
               Shape<Dim> shape,
               const Op &op) {
   for (Index i = 0; i < shape.head(); ++i) {
-    unary_op(in, in_stride.tail(), out, out_stride.tail(), shape.tail(), op);
-    in += in_stride.head();
-    out += out_stride.head();
+    unary_op(
+        in + i * in_stride.head(), in_stride.tail(),
+        out + i * out_stride.head(), out_stride.tail(), shape.tail(), op);
   }
 }
 
@@ -131,12 +130,10 @@ void binary_op(const Tin1 *in1,
                Shape<Dim> shape,
                const Op &op) {
   for (Index i = 0; i < shape.head(); ++i) {
-    binary_op(in1, in1_stride.tail(), in2, in2_stride.tail(),
-        out, out_stride.tail(), shape.tail(), op);
-
-    in1 += in1_stride.head();
-    in2 += in2_stride.head();
-    out += out_stride.head();
+    binary_op(
+        in1 + i * in1_stride.head(), in1_stride.tail(),
+        in2 + i * in2_stride.head(), in2_stride.tail(),
+        out + i * out_stride.head(), out_stride.tail(), shape.tail(), op);
   }
 }
 
