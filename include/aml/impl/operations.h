@@ -48,37 +48,55 @@ inline void gemm(OP op_a,
       m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
+/** SET ***********************************************************************/
+
+template <typename T>
+void set(T *out,
+         const Shape<0> &stride,
+         const Shape<0> &shape,
+         const T &val) {
+  *out = val;
+}
+
+template <typename T, int Dim>
+void set(T *out,
+         const Shape<Dim> &stride,
+         const Shape<Dim> &shape,
+         const T &val) {
+  for (Index i = 0; i < shape.head(); ++i) {
+    set(out, stride.tail(), shape.tail(), val);
+    out += stride.head();
+  }
+}
+
+template <typename T, int Dim>
+void set(Array<T, Dim> &out, const T &val) {
+  set(out.data(), out.stride(), out.shape(), val);
+}
+
 /** UNARY_OP ******************************************************************/
 
 template <typename Tin, typename Tout, typename Op>
 void unary_op(const Tin *in,
               Shape<0> in_stride,
-              Index in_start,
               Tout *out,
               Shape<0> out_stride,
-              Index out_start,
               Shape<0> shape,
               const Op &op) {
-  out[out_start] = op(in[in_start]);
+  *out = op(*in);
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
 void unary_op(const Tin *in,
               Shape<Dim> in_stride,
-              Index in_start,
               Tout *out,
               Shape<Dim> out_stride,
-              Index out_start,
               Shape<Dim> shape,
               const Op &op) {
   for (Index i = 0; i < shape.head(); ++i) {
-    unary_op(
-        in, in_stride.tail(), in_start,
-        out, out_stride.tail(), out_start,
-        shape.tail(), op);
-
-    in_start += in_stride.head();
-    out_start += out_stride.head();
+    unary_op(in, in_stride.tail(), out, out_stride.tail(), shape.tail(), op);
+    in += in_stride.head();
+    out += out_stride.head();
   }
 }
 
@@ -86,10 +104,7 @@ template <typename Tin, typename Tout, int Dim, typename Op>
 void unary_op(const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
-  unary_op(
-      in.data(), in.stride(), 0,
-      out.data(), out.stride(), 0,
-      in.shape(), op);
+  unary_op(in.data(), in.stride(), out.data(), out.stride(), in.shape(), op);
 }
 
 /** BINARY_OP *****************************************************************/
@@ -97,40 +112,31 @@ void unary_op(const ImmutableArray<Tin, Dim> &in,
 template <typename Tin1, typename Tin2, typename Tout, typename Op>
 void binary_op(const Tin1 *in1,
                Shape<0> in1_stride,
-               Index in1_start,
                const Tin2 *in2,
                Shape<0> in2_stride,
-               Index in2_start,
                Tout *out,
                Shape<0> out_stride,
-               Index out_start,
                Shape<0> shape,
                const Op &op) {
-  out[out_start] = op(in1[in1_start], in2[in2_start]);
+  *out = op(*in1, *in2);
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
 void binary_op(const Tin1 *in1,
                Shape<Dim> in1_stride,
-               Index in1_start,
                const Tin2 *in2,
                Shape<Dim> in2_stride,
-               Index in2_start,
                Tout *out,
                Shape<Dim> out_stride,
-               Index out_start,
                Shape<Dim> shape,
                const Op &op) {
   for (Index i = 0; i < shape.head(); ++i) {
-    binary_op(
-        in1, in1_stride.tail(), in1_start,
-        in2, in2_stride.tail(), in2_start,
-        out, out_stride.tail(), out_start,
-        shape.tail(), op);
+    binary_op(in1, in1_stride.tail(), in2, in2_stride.tail(),
+        out, out_stride.tail(), shape.tail(), op);
 
-    in1_start += in1_stride.head();
-    in2_start += in2_stride.head();
-    out_start += out_stride.head();
+    in1 += in1_stride.head();
+    in2 += in2_stride.head();
+    out += out_stride.head();
   }
 }
 
@@ -139,14 +145,11 @@ void binary_op(const ImmutableArray<Tin1, Dim> &in1,
                const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
-  binary_op(
-      in1.data(), in1.stride(), 0,
-      in2.data(), in2.stride(), 0,
-      out.data(), out.stride(), 0,
-      in1.shape(), op);
+  binary_op(in1.data(), in1.stride(), in2.data(), in2.stride(),
+      out.data(), out.stride(), in1.shape(), op);
 }
 
-/** BINARY_OP *****************************************************************/
+/** REDUCE ********************************************************************/
 
 template <typename Tin,
           typename Tout,
@@ -198,7 +201,6 @@ void reduce(const ImmutableArray<Tin, DimIn> &in,
             Shape<DimIn> stride) {
   reduce(in.data(), in.stride(), in.shape(), out.data(), stride, op_t, op_r);
 }
-
 
 }  // namespace cpu
 }  // namespace impl

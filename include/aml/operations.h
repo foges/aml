@@ -38,6 +38,11 @@ void gemm(OP op_a,
       a.stride()[1], b.data(), b.stride()[1], beta, c.data(), c.stride()[1]));
 }
 
+template <typename T, int Dim>
+void set(Array<T, Dim> &out, const T &val) {
+  AML_DEVICE_EVAL(out.device(), set(out, val));
+}
+
 template <typename Tin, typename Tout, int Dim, typename Op>
 void unary_op(const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,

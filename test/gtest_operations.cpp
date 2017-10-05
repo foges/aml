@@ -103,6 +103,15 @@ TEST_F(GemmTest, DoubleTT) {
 // - GPU
 // - alpha, beta != 1, 0
 // - strided
+//
+TEST(OperationsTest, Set) {
+  auto a = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 1, 2));
+  aml::set(a, 9);
+  EXPECT_EQ(a.data()[0], 9);
+  EXPECT_EQ(a.data()[1], 9);
+  EXPECT_EQ(a.data()[2], 9);
+  EXPECT_EQ(a.data()[3], 9);
+}
 
 TEST(OperationsTest, UnaryOpAbs) {
   std::vector<int> data = {-4, 2, -3, -9};
