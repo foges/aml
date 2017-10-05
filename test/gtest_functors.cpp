@@ -15,6 +15,13 @@ TEST(FunctorTest, Exp) {
   EXPECT_EQ(aml::Exp()(-0.5), std::exp(-0.5));
 }
 
+TEST(FunctorTest, Identity) {
+  EXPECT_EQ(aml::Identity()(0.5f), 0.5f);
+  EXPECT_EQ(aml::Identity()(0.5), 0.5);
+  EXPECT_EQ(aml::Identity()(-0.5f), -0.5f);
+  EXPECT_EQ(aml::Identity()(-0.5), -0.5);
+}
+
 TEST(FunctorTest, Inv) {
   EXPECT_EQ(aml::Inv()(0.5f), 2.0f);
   EXPECT_EQ(aml::Inv()(0.5), 2.0);

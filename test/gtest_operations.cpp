@@ -99,15 +99,15 @@ TEST_F(GemmTest, DoubleTT) {
 }
 
 // TODO:
-// - Larger non-square tests
-// - GPU tests
+// - Larger non-square
+// - GPU
 // - alpha, beta != 1, 0
-// - stridede
+// - strided
 
 TEST(OperationsTest, UnaryOpAbs) {
   std::vector<int> data = {-4, 2, -3, -9};
   auto a = aml::make_array(data, aml::make_shape(1, 2, 1, 2));
-  aml::unary_op(aml::make_const(a), a, aml::Abs());
+  aml::unary_op(a, a, aml::Abs());
   EXPECT_EQ(a.data()[0], 4);
   EXPECT_EQ(a.data()[1], 2);
   EXPECT_EQ(a.data()[2], 3);
@@ -115,12 +115,12 @@ TEST(OperationsTest, UnaryOpAbs) {
 }
 
 TEST(OperationsTest, BinaryOpMax) {
-  std::vector<int> data1 = {4, 5, 3, 9};
-  std::vector<int> data2 = {8, 4, 1, 7};
+  std::vector<int> data1 = {4, 5, 3, 7};
+  std::vector<int> data2 = {8, 4, 1, 9};
   auto in1 = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
   auto in2 = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
   auto out = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 2, 1));
-  aml::binary_op(aml::make_const(in1), aml::make_const(in2), out, aml::Max());
+  aml::binary_op(in1, in2, out, aml::Max());
   EXPECT_EQ(out.data()[0], 8);
   EXPECT_EQ(out.data()[1], 5);
   EXPECT_EQ(out.data()[2], 3);
@@ -137,7 +137,57 @@ TEST(OperationsTest, BinaryOpMaxSlice) {
   auto in2s = aml::slice(in2, aml::make_shape(0, 1, 0, 0),
       aml::make_shape(1, 2, 2, 1));
   auto out = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 1, 2, 1));
-  aml::binary_op(aml::make_const(in1s), aml::make_const(in2s), out, aml::Max());
-  EXPECT_EQ(out.data()[0], 5);
-  EXPECT_EQ(out.data()[1], 9);
+  aml::binary_op(in1s, in2s, out, aml::Min());
+  EXPECT_EQ(out.data()[0], 4);
+  EXPECT_EQ(out.data()[1], 7);
 }
+
+TEST(OperationsTest, ReduceMax) {
+  std::vector<int> data = {4, -9, -3, 7};
+  std::vector<int> res = {0};
+  auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
+  auto out = aml::make_array(res, aml::Shape<0>());
+  aml::reduce(in, out, {{0, 1, 3, 2}}, aml::Identity(), aml::Max());
+  EXPECT_EQ(out.data()[0], 7);
+}
+
+TEST(OperationsTest, ReduceMaxAbs) {
+  std::vector<int> data = {4, -9, -3, 7};
+  std::vector<int> res = {0};
+  auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
+  auto out = aml::make_array(res, aml::Shape<0>());
+  aml::reduce(in, out, {{0, 1, 3, 2}}, aml::Abs(), aml::Max());
+  EXPECT_EQ(out.data()[0], 9);
+}
+
+TEST(OperationsTest, ReduceMaxAbsSlice) {
+  std::vector<int> data = {4, -9, -3, 7};
+  std::vector<int> res = {0};
+  auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
+  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
+      aml::make_shape(1, 1, 2, 1));
+  auto out = aml::make_array(res, aml::Shape<0>());
+  aml::reduce(ins, out, {{3, 1, 0, 2}}, aml::Abs(), aml::Max());
+  EXPECT_EQ(out.data()[0], 4);
+}
+
+TEST(OperationsTest, ReducePartial1Max) {
+  std::vector<int> data = {4, -9, -3, 7};
+  std::vector<int> res = {0, 0};
+  auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
+  auto out = aml::make_array(res, aml::make_shape(2));
+  aml::reduce(in, out, {{0, 3, 2}}, aml::Identity(), aml::Max());
+  EXPECT_EQ(out.data()[0], 4);
+  EXPECT_EQ(out.data()[1], 7);
+}
+
+TEST(OperationsTest, ReducePartial2Max) {
+  std::vector<int> data = {4, 7, -3, -9};
+  std::vector<int> res = {-10, -10};
+  auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
+  auto out = aml::make_array(res, aml::make_shape(2));
+  aml::reduce(in, out, {{0, 3, 1}}, aml::Identity(), aml::Max());
+  EXPECT_EQ(out.data()[0], 7);
+  EXPECT_EQ(out.data()[1], -3);
+}
+

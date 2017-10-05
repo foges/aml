@@ -83,7 +83,7 @@ void unary_op(const Tin *in,
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(const ConstArray<Tin, Dim> &in,
+void unary_op(const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
   unary_op(
@@ -92,7 +92,7 @@ void unary_op(const ConstArray<Tin, Dim> &in,
       in.shape(), op);
 }
 
-/** UNARY_OP ******************************************************************/
+/** BINARY_OP *****************************************************************/
 
 template <typename Tin1, typename Tin2, typename Tout, typename Op>
 void binary_op(const Tin1 *in1,
@@ -135,8 +135,8 @@ void binary_op(const Tin1 *in1,
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(const ConstArray<Tin1, Dim> &in1,
-               const ConstArray<Tin2, Dim> &in2,
+void binary_op(const ImmutableArray<Tin1, Dim> &in1,
+               const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
   binary_op(
@@ -145,6 +145,60 @@ void binary_op(const ConstArray<Tin1, Dim> &in1,
       out.data(), out.stride(), 0,
       in1.shape(), op);
 }
+
+/** BINARY_OP *****************************************************************/
+
+template <typename Tin,
+          typename Tout,
+          typename TransformOp,
+          typename ReduceOp>
+void reduce(const Tin *in,
+            const Shape<0> &stride_in,
+            const Shape<0> &shape_in,
+            Tout *out,
+            const Shape<0> &stride_out,
+            const TransformOp &op_t,
+            const ReduceOp &op_r) {
+  *out = op_r(*out, op_t(*in));
+}
+
+template <typename Tin,
+          int Dim,
+          typename Tout,
+          typename TransformOp,
+          typename ReduceOp>
+void reduce(const Tin *in,
+            const Shape<Dim> &stride_in,
+            const Shape<Dim> &shape_in,
+            Tout *out,
+            const Shape<Dim> &stride_out,
+            const TransformOp &op_t,
+            const ReduceOp &op_r) {
+  for (Index i = 0; i < shape_in.head(); ++i) {
+    reduce(in + i * stride_in.head(),
+           stride_in.tail(),
+           shape_in.tail(),
+           out + i * stride_out.head(),
+           stride_out.tail(),
+           op_t,
+           op_r);
+  }
+}
+
+template <typename Tin,
+          int DimIn,
+          typename Tout,
+          int DimOut,
+          typename TransformOp,
+          typename ReduceOp>
+void reduce(const ImmutableArray<Tin, DimIn> &in,
+            Array<Tout, DimOut> &out,
+            const TransformOp &op_t,
+            const ReduceOp &op_r,
+            Shape<DimIn> stride) {
+  reduce(in.data(), in.stride(), in.shape(), out.data(), stride, op_t, op_r);
+}
+
 
 }  // namespace cpu
 }  // namespace impl

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+
 #include <aml/defs.h>
 #include <aml/impl/operations.h>
 
@@ -9,8 +11,8 @@ template <typename T>
 void gemm(OP op_a,
           OP op_b,
           T alpha,
-          const ConstMatrix<T> &a,
-          const ConstMatrix<T> &b,
+          const ImmutableMatrix<T> &a,
+          const ImmutableMatrix<T> &b,
           T beta,
           Matrix<T> &c) {
   Index Ma = op_a == NO_TRANS ? a.shape()[0] : a.shape()[1];
@@ -37,7 +39,7 @@ void gemm(OP op_a,
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(const ConstArray<Tin, Dim> &in,
+void unary_op(const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
   AML_ASSERT(in.device() == out.device(), "Device mismatch");
@@ -47,8 +49,8 @@ void unary_op(const ConstArray<Tin, Dim> &in,
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(const ConstArray<Tin1, Dim> &in1,
-               const ConstArray<Tin2, Dim> &in2,
+void binary_op(const ImmutableArray<Tin1, Dim> &in1,
+               const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
   Device device = in1.device();
@@ -59,6 +61,39 @@ void binary_op(const ConstArray<Tin1, Dim> &in1,
   AML_ASSERT(shape == in2.shape() && shape == out.shape(), "Shape mismatch");
 
   AML_DEVICE_EVAL(device, binary_op(in1, in2, out, op));
+}
+
+template <typename Tin,
+          int DimIn,
+          typename Tout,
+          int DimOut,
+          typename TransformOp,
+          typename ReduceOp>
+void reduce(const ImmutableArray<Tin, DimIn> &in,
+            Array<Tout, DimOut> &out,
+            std::array<int, DimIn - DimOut> axis,
+            const TransformOp &op_t,
+            const ReduceOp &op_r) {
+  AML_ASSERT(in.device() == out.device(), "Device mismatch");
+
+  Shape<DimIn> stride;
+  int num = 0;
+  for (int i = 0; i < DimIn; ++i) {
+    bool do_reduce = false;
+    for (int j = 0; j < DimIn - DimOut; ++j) {
+      if (axis[j] == i) {
+        do_reduce = true;
+      }
+    }
+    if (!do_reduce) {
+      AML_ASSERT(in.shape()[i] == out.shape()[num], "Dimension mismatch");
+      stride[i] = out.stride()[num];
+      ++num;
+    }
+  }
+  AML_ASSERT(num == DimOut, "Repeat axis found");
+
+  AML_DEVICE_EVAL(in.device(), reduce(in, out, op_t, op_r, stride));
 }
 
 }  // namespace aml

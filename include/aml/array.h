@@ -7,13 +7,13 @@
 #include <aml/allocation.h>
 #include <aml/defs.h>
 #include <aml/device.h>
-#include <aml/impl/shape.h>
+#include <aml/immutable_array.h>
 #include <aml/shape.h>
 
 namespace aml {
 
 template <typename T, int Dim>
-class Array {
+class Array : public ImmutableArray<T, Dim> {
 public:
   Array(Device device, const Shape<Dim> &shape)
       : allocation_(new Allocation(device, sizeof(T) * shape.numel())),
@@ -31,6 +31,8 @@ public:
         stride_(stride) { }
 
   Array() : data_(nullptr), shape_(), stride_(impl::strides(shape_)) { }
+
+  ~Array() { }
 
   Device device() const {
     AML_DEBUG_ASSERT(allocation_ != nullptr);

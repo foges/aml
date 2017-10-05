@@ -6,13 +6,13 @@
 #include <aml/array.h>
 #include <aml/defs.h>
 #include <aml/device.h>
-#include <aml/impl/shape.h>
+#include <aml/immutable_array.h>
 #include <aml/shape.h>
 
 namespace aml {
 
 template <typename T, int Dim>
-class ConstArray {
+class ConstArray : public ImmutableArray<T, Dim> {
 public:
   ConstArray(std::shared_ptr<const Allocation> allocation,
              const T *data,
@@ -30,6 +30,8 @@ public:
                    array.stride()) { }
 
   ConstArray() : data_(nullptr), shape_(), stride_(impl::strides(shape_)) { }
+
+  ~ConstArray() { }
 
   Device device() const {
     return allocation_->device();
@@ -71,15 +73,9 @@ template <typename T>
 using ConstMatrix = ConstArray<T, 2>;
 
 template <typename T, int Dim>
-ConstArray<T, Dim> make_const(const aml::Array<T, Dim> &array) {
-  return array;
-}
-
-template <typename T, int Dim>
-ConstArray<T, Dim> slice(const ConstArray<T, Dim> &array,
+ConstArray<T, Dim> slice(const ImmutableArray<T, Dim> &array,
                          const Shape<Dim> &begin,
                          const Shape<Dim> &end) {
-  AML_ASSERT(begin <= array.shape(), "Cannot slice outside of array");
   AML_ASSERT(end <= array.shape(), "Cannot slice outside of array");
   AML_ASSERT(begin <= end, "Slice begin must come before end");
 
@@ -91,7 +87,7 @@ ConstArray<T, Dim> slice(const ConstArray<T, Dim> &array,
 }
 
 template <typename T, int DimOld, int DimNew>
-ConstArray<T, DimNew> reshape(const ConstArray<T, DimOld> &array,
+ConstArray<T, DimNew> reshape(const ImmutableArray<T, DimOld> &array,
                               const Shape<DimNew> &shape) {
   AML_ASSERT(array.shape().numel() == shape.numel(),
       "Reshape must keep the same number of elements");

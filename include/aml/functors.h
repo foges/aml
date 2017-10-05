@@ -25,6 +25,14 @@ public:
   }
 };
 
+class Identity {
+public:
+  template <typename T>
+  AML_HOST_DEVICE T operator()(const T &x) const {
+    return x;
+  }
+};
+
 class Inv {
 public:
   template <typename T>
