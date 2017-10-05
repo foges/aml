@@ -2,23 +2,25 @@
 
 #include <aml/aml.h>
 
+const size_t kZeroSize = 0;
+
 TEST(AllocationTestCpu, Empty) {
   aml::Allocation a;
-  EXPECT_EQ(a.size(), 0);
+  EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::CPU);
 }
 
 TEST(AllocationTestCpu, EmptyConst) {
   const aml::Allocation a;
-  EXPECT_EQ(a.size(), 0);
+  EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::CPU);
 }
 
 TEST(AllocationTestCpu, Size0) {
   const aml::Allocation a(aml::CPU, 0);;
-  EXPECT_EQ(a.size(), 0);
+  EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::CPU);
 }
@@ -44,7 +46,7 @@ TEST(AllocationTestCpu, Free) {
 
   a.~Allocation();
 
-  EXPECT_EQ(a.size(), 0);
+  EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
 }
 

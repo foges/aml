@@ -52,8 +52,8 @@ inline void gemm(OP op_a,
 
 template <typename T>
 void set(T *out,
-         const Shape<0> &stride,
-         const Shape<0> &shape,
+         const Shape<0>&,
+         const Shape<0>&,
          const T &val) {
   *out = val;
 }
@@ -77,20 +77,20 @@ void set(Array<T, Dim> &out, const T &val) {
 
 template <typename Tin, typename Tout, typename Op>
 void unary_op(const Tin *in,
-              Shape<0> in_stride,
+              const Shape<0>&,
               Tout *out,
-              Shape<0> out_stride,
-              Shape<0> shape,
+              const Shape<0>&,
+              const Shape<0>&,
               const Op &op) {
   *out = op(*in);
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
 void unary_op(const Tin *in,
-              Shape<Dim> in_stride,
+              const Shape<Dim> &in_stride,
               Tout *out,
-              Shape<Dim> out_stride,
-              Shape<Dim> shape,
+              const Shape<Dim> &out_stride,
+              const Shape<Dim> &shape,
               const Op &op) {
   for (Index i = 0; i < shape.head(); ++i) {
     unary_op(
@@ -110,24 +110,24 @@ void unary_op(const ImmutableArray<Tin, Dim> &in,
 
 template <typename Tin1, typename Tin2, typename Tout, typename Op>
 void binary_op(const Tin1 *in1,
-               Shape<0> in1_stride,
+               const Shape<0>&,
                const Tin2 *in2,
-               Shape<0> in2_stride,
+               const Shape<0>&,
                Tout *out,
-               Shape<0> out_stride,
-               Shape<0> shape,
+               const Shape<0>&,
+               const Shape<0>&,
                const Op &op) {
   *out = op(*in1, *in2);
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
 void binary_op(const Tin1 *in1,
-               Shape<Dim> in1_stride,
+               const Shape<Dim> &in1_stride,
                const Tin2 *in2,
-               Shape<Dim> in2_stride,
+               const Shape<Dim> &in2_stride,
                Tout *out,
-               Shape<Dim> out_stride,
-               Shape<Dim> shape,
+               const Shape<Dim> &out_stride,
+               const Shape<Dim> &shape,
                const Op &op) {
   for (Index i = 0; i < shape.head(); ++i) {
     binary_op(
@@ -153,10 +153,10 @@ template <typename Tin,
           typename TransformOp,
           typename ReduceOp>
 void reduce(const Tin *in,
-            const Shape<0> &stride_in,
-            const Shape<0> &shape_in,
+            const Shape<0>&,
+            const Shape<0>&,
             Tout *out,
-            const Shape<0> &stride_out,
+            const Shape<0>&,
             const TransformOp &op_t,
             const ReduceOp &op_r) {
   *out = op_r(*out, op_t(*in));

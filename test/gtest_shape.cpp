@@ -2,54 +2,37 @@
 
 #include <aml/aml.h>
 
-#define EXPECT_EQ_INT(lhs, rhs) EXPECT_EQ((lhs), static_cast<int>((rhs)));
+#define EXPECT_EQ_IDX(lhs, rhs) EXPECT_EQ((lhs), static_cast<aml::Index>(rhs))
 
 TEST(ShapeTest, DefaultConstructor) {
   aml::Shape<2> s;
-  EXPECT_EQ_INT(0, s[0]);
-  EXPECT_EQ_INT(0, s[1]);
+  EXPECT_EQ_IDX(s[0], 0);
+  EXPECT_EQ_IDX(s[1], 0);
 }
 
-TEST(ShapeTest, InitializerList) {
-  aml::Shape<2> s = aml::make_shape(3, 4);
-  EXPECT_EQ_INT(3, s[0]);
-  EXPECT_EQ_INT(4, s[1]);
-}
-
-TEST(ShapeTest, InitializerListConstructor) {
-  aml::Shape<2> s = aml::make_shape(3, 4);
-  EXPECT_EQ_INT(3, s[0]);
-  EXPECT_EQ_INT(4, s[1]);
+TEST(ShapeTest, Constructor) {
+  aml::Shape<2> s = aml::Shape<2>(3u, 4u);
+  EXPECT_EQ_IDX(s[0], 3);
+  EXPECT_EQ_IDX(s[1], 4);
 }
 
 TEST(ShapeTest, Assignment) {
   aml::Shape<2> s = aml::make_shape(3, 4);
-  EXPECT_EQ_INT(3, s[0]);
-  EXPECT_EQ_INT(4, s[1]);
+  EXPECT_EQ_IDX(s[0], 3);
+  EXPECT_EQ_IDX(s[1], 4);
   s[1] = 5;
-  EXPECT_EQ_INT(5, s[1]);
+  EXPECT_EQ_IDX(s[1], 5);
 }
 
 TEST(ShapeTest, MakeShape1) {
   aml::Shape<1> s = aml::make_shape(4);
-  EXPECT_EQ_INT(4, s[0]);
+  EXPECT_EQ_IDX(s[0], 4);
 }
 
 TEST(ShapeTest, MakeShape2) {
   aml::Shape<2> s = aml::make_shape(3, 4);
-  EXPECT_EQ_INT(3, s[0]);
-  EXPECT_EQ_INT(4, s[1]);
-}
-
-TEST(ShapeTest, MakeShapeAuto1) {
-  auto s = aml::make_shape(3u);
-  EXPECT_EQ_INT(3, s[0]);
-}
-
-TEST(ShapeTest, MakeShapeAuto2) {
-  auto s = aml::make_shape(3, 4);
-  EXPECT_EQ_INT(3, s[0]);
-  EXPECT_EQ_INT(4, s[1]);
+  EXPECT_EQ_IDX(s[0], 3);
+  EXPECT_EQ_IDX(s[1], 4);
 }
 
 TEST(ShapeTest, Equals) {
@@ -79,13 +62,13 @@ TEST(ShapeTest, GreaterThan) {
 TEST(ShapeTest, Iterator) {
   aml::Shape<2> s = aml::make_shape(3, 4);
   auto it = s.begin();
-  EXPECT_EQ(*it, 3);
+  EXPECT_EQ_IDX(*it, 3);
   *it = 7;
-  EXPECT_EQ(*it, 7);
+  EXPECT_EQ_IDX(*it, 7);
   ++it;
-  EXPECT_EQ(*it, 4);
+  EXPECT_EQ_IDX(*it, 4);
   *it = 7;
-  EXPECT_EQ(*it, 7);
+  EXPECT_EQ_IDX(*it, 7);
   ++it;
   EXPECT_EQ(it, s.end());
 }
@@ -93,9 +76,9 @@ TEST(ShapeTest, Iterator) {
 TEST(ShapeTest, IteratorConst) {
   const aml::Shape<2> s = aml::make_shape(3, 4);
   auto it = s.begin();
-  EXPECT_EQ(*it, 3);
+  EXPECT_EQ_IDX(*it, 3);
   ++it;
-  EXPECT_EQ(*it, 4);
+  EXPECT_EQ_IDX(*it, 4);
   ++it;
   EXPECT_EQ(it, s.end());
 }
@@ -108,10 +91,11 @@ TEST(ShapeTest, Copy) {
 
 TEST(ShapeTest, Size1) {
   aml::Shape<1> s = aml::make_shape(4);
-  EXPECT_EQ_INT(1, s.dim());
+  EXPECT_EQ(s.dim(), 1);
 }
 
 TEST(ShapeTest, Size2) {
   aml::Shape<2> s = aml::make_shape(9, 5);
-  EXPECT_EQ_INT(2, s.dim());
+  EXPECT_EQ(s.dim(), 2);
 }
+

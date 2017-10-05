@@ -1,6 +1,6 @@
 CC=clang++
 GTEST_DIR=/Users/chris/code/libs/googletest/googletest
-FLAGS=-std=c++11 -pthread -framework Accelerate -Wall -DAML_DEBUG #-DALL_GPU
+FLAGS=-std=c++11 -pthread -framework Accelerate -Wall -Wextra -DAML_DEBUG #-DALL_GPU
 DEPS=-Iinclude -I${GTEST_DIR}/include
 
 TESTS=$(wildcard test/gtest_*.cpp)
