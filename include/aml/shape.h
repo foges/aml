@@ -30,8 +30,8 @@ struct Shape {
 
   AML_HOST_DEVICE Index numel() const {
     Index num = 1;
-    for (auto dim : dims_) {
-      num *= dim;
+    for (int i = 0; i < Dim; ++i) {
+      num *= dims_[i];
     }
     return num;
   }
@@ -90,7 +90,7 @@ struct Shape {
     return s;
   }
 
-  Index dims_[Dim];
+  Index dims_[Dim == 0 ? 1 : Dim];
 };
 
 template <class... T>
@@ -110,6 +110,8 @@ Shape<Dim> strides(const Shape<Dim> &shape) {
   }
   return stride;
 }
+
+template <> inline Shape<0> strides(const Shape<0>&) { return Shape<0>(); }
 
 template <int Dim>
 Index dot(const Shape<Dim> &s1, const Shape<Dim> &s2) {

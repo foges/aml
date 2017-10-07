@@ -13,6 +13,16 @@ std::string string() { return "1"; }
 std::string string_return(std::string x) { return x; }
 void no_return() { }
 }  // namespace cpu
+
+#ifdef AML_GPU
+namespace gpu {
+int number() { return 2; }
+int number_return(int x) { return x; }
+std::string string() { return "2"; }
+std::string string_return(std::string x) { return x; }
+void no_return() { }
+}  // namespace gpu
+#endif
 }  // namespace impl
 }  // namespace aml
 
@@ -49,18 +59,6 @@ TEST(DeviceEvalTestCpu, NoReturn) {
 }
 
 #ifdef AML_GPU
-namespace aml {
-namespace impl {
-namespace gpu {
-int number() { return 2; }
-int number_return(int x) { return x; }
-std::string string() { return "2"; }
-std::string string_return(std::string x) { return x; }
-void no_return() { }
-}  // namespace gpu
-}  // namespace impl
-}  // namespace aml
-
 TEST(DeviceEvalTestGpu, Number) {
   EXPECT_EQ(2, AML_DEVICE_EVAL(aml::GPU, number()));
 }

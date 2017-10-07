@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <sstream>
@@ -27,8 +28,7 @@
 // Debug
 #ifdef AML_DEBUG
 
-#define AML_DEBUG_ASSERT(statement) \
-  AML_ASSERT_EXCEPTION(std::logic_error, (statement), "")
+#define AML_DEBUG_ASSERT(statement) assert(statement)
 #define AML_DEBUG_PRINTF(...) std::printf(_1, ...)
 
 #else
@@ -42,7 +42,7 @@
 #ifdef AML_GPU
 #define AML_HOST_DEVICE __host__ __device__
 
-#define AML_GPU_ERROR(statement) \
+#define AML_GPU_CHECK(statement) \
   do { \
     cudaError_t error = (statement); \
     AML_ASSERT(error == cudaSuccess, cudaGetErrorString(error)); \
