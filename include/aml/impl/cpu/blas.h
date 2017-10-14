@@ -3,6 +3,7 @@
 #include <cblas.h>
 
 #include <aml/defs.h>
+#include <aml/handle.h>
 
 namespace aml {
 namespace impl {
@@ -12,7 +13,8 @@ inline CBLAS_TRANSPOSE convert_op(OP op) {
   return op == NO_TRANS ? CblasNoTrans : CblasTrans;
 }
 
-inline void gemm(OP op_a,
+inline void gemm(aml::Handle,
+                 OP op_a,
                  OP op_b,
                  Index m,
                  Index n,
@@ -29,7 +31,8 @@ inline void gemm(OP op_a,
       m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
 
-inline void gemm(OP op_a,
+inline void gemm(aml::Handle,
+                 OP op_a,
                  OP op_b,
                  Index m,
                  Index n,
@@ -45,6 +48,20 @@ inline void gemm(OP op_a,
   cblas_dgemm(CblasColMajor, convert_op(op_a), convert_op(op_b),
       m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
 }
+
+inline float nrm2(aml::Handle,
+                  Index n,
+                  const float *x) {
+  return cblas_snrm2(n, x, 1);
+}
+
+inline double nrm2(aml::Handle,
+                   Index n,
+                   const double *x) {
+  return cblas_dnrm2(n, x, 1);
+}
+
+
 
 }  // namespace cpu
 }  // namespace impl

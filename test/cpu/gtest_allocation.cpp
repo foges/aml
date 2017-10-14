@@ -4,28 +4,28 @@
 
 const size_t kZeroSize = 0;
 
-TEST(AllocationTestCpu, Empty) {
+TEST(AllocationTest, Empty) {
   aml::Allocation a;
   EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::CPU);
 }
 
-TEST(AllocationTestCpu, EmptyConst) {
+TEST(AllocationTest, EmptyConst) {
   const aml::Allocation a;
   EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::CPU);
 }
 
-TEST(AllocationTestCpu, Size0) {
+TEST(AllocationTest, Size0) {
   const aml::Allocation a(aml::CPU, 0);;
   EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::CPU);
 }
 
-TEST(AllocationTestCpu, Size2) {
+TEST(AllocationTest, Size2) {
   aml::Allocation a(aml::CPU, 2 * sizeof(int));;
   int *data = static_cast<int*>(a.data());
   data[0] = 3;
@@ -38,7 +38,7 @@ TEST(AllocationTestCpu, Size2) {
   EXPECT_EQ(data[1], 4);
 }
 
-TEST(AllocationTestCpu, Free) {
+TEST(AllocationTest, Free) {
   aml::Allocation a(aml::CPU, sizeof(int));
 
   EXPECT_EQ(a.size(), sizeof(int));
@@ -49,6 +49,4 @@ TEST(AllocationTestCpu, Free) {
   EXPECT_EQ(a.size(), kZeroSize);
   EXPECT_EQ(a.data(), nullptr);
 }
-
-// TODO: GPU tests
 

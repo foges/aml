@@ -18,11 +18,16 @@ std::vector<double> CTT = {-5.0, 13.0,  5.0, -13.0};
 class BlasTest : public ::testing::Test {
 public:
   BlasTest() {
+    h.init();
     size = 4;
     Af = aml::make_array(Afl, aml::make_shape(2, 2));
     Bf = aml::make_array(Bfl, aml::make_shape(2, 2));
     Ad = aml::make_array(Ado, aml::make_shape(2, 2));
     Bd = aml::make_array(Bdo, aml::make_shape(2, 2));
+  }
+
+  ~BlasTest() {
+    h.destroy();
   }
 
 protected:
@@ -32,6 +37,8 @@ protected:
     Cf = aml::make_array(data_f, aml::make_shape(2, 2));
     Cd = aml::make_array(data_d, aml::make_shape(2, 2));
   }
+
+  aml::Handle h;
 
   size_t size;
   aml::ConstMatrix<float> Af;
@@ -43,65 +50,75 @@ protected:
 };
 
 TEST_F(BlasTest, GemmFloatNN) {
-  aml::gemm(aml::NO_TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, aml::NO_TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CNN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmFloatTN) {
-  aml::gemm(aml::TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, aml::TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CTN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmFloatNT) {
-  aml::gemm(aml::NO_TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, aml::NO_TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CNT[i]);
   }
 }
 
 TEST_F(BlasTest, GemmFloatTT) {
-  aml::gemm(aml::TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, aml::TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CTT[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleNN) {
-  aml::gemm(aml::NO_TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, aml::NO_TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CNN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleTN) {
-  aml::gemm(aml::TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, aml::TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CTN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleNT) {
-  aml::gemm(aml::NO_TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, aml::NO_TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CNT[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleTT) {
-  aml::gemm(aml::TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, aml::TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CTT[i]);
   }
 }
 
+TEST_F(BlasTest, Norm2Float) {
+  auto x = aml::reshape(Af, aml::make_shape(4));
+  float nrm2 = aml::nrm2(h, x);
+  EXPECT_EQ(nrm2, std::sqrtf(39.0f));
+}
+
+TEST_F(BlasTest, Norm2Double) {
+  auto x = aml::reshape(Ad, aml::make_shape(4));
+  double nrm2 = aml::nrm2(h, x);
+  EXPECT_EQ(nrm2, std::sqrt(39.0));
+}
+
 // TODO:
 // - Larger non-square
-// - GPU
 // - alpha, beta != 1, 0
 // - strided
-//
 

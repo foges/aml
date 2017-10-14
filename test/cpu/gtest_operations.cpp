@@ -11,6 +11,38 @@ TEST(OperationsTest, Set) {
   EXPECT_EQ(a.data()[3], 9);
 }
 
+TEST(OperationsTest, Copy) {
+  std::vector<int> data = {4, 2, 3, -9};
+  auto a = aml::make_array(data, aml::make_shape(2, 2));
+  auto b = aml::Array<int, 2>(aml::CPU, a.size());
+  aml::copy(a, b);
+  EXPECT_EQ(b.data()[0], 4);
+  EXPECT_EQ(b.data()[1], 2);
+  EXPECT_EQ(b.data()[2], 3);
+  EXPECT_EQ(b.data()[3], -9);
+}
+
+TEST(OperationsTest, CopyTypeCast) {
+  std::vector<double> data = {4.0, 2.0, 3.0, -9.0};
+  auto a = aml::make_array(data, aml::make_shape(2, 2));
+  auto b = aml::Array<int, 2>(aml::CPU, a.size());
+  aml::copy(a, b);
+  EXPECT_EQ(b.data()[0], 4);
+  EXPECT_EQ(b.data()[1], 2);
+  EXPECT_EQ(b.data()[2], 3);
+  EXPECT_EQ(b.data()[3], -9);
+}
+
+TEST(OperationsTest, CopyNonContiguous) {
+  std::vector<int> data = {4, 2, 3, -9};
+  auto a = aml::make_array(data, aml::make_shape(2, 2));
+  auto b = aml::slice(a, aml::make_shape(1, 0), aml::make_shape(2, 2));
+  auto c = aml::Array<int, 2>(aml::CPU, b.size());
+  aml::copy(b, c);
+  EXPECT_EQ(c.data()[0], 2);
+  EXPECT_EQ(c.data()[1], -9);
+}
+
 TEST(OperationsTest, UnaryOpAbs) {
   std::vector<int> data = {-4, 2, -3, -9};
   auto a = aml::make_array(data, aml::make_shape(1, 2, 1, 2));

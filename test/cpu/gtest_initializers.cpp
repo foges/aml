@@ -7,7 +7,7 @@
 TEST(InitializersTest, Zeros) {
   auto s = aml::make_shape(3, 1);
   auto a = aml::zeros<float, 2>(aml::CPU, s);
-  EXPECT_EQ(a.shape(), s);
+  EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);
   EXPECT_TRUE(a.is_contiguous());
   EXPECT_EQ(a.data()[0], 0.0f);
@@ -18,7 +18,7 @@ TEST(InitializersTest, Zeros) {
 TEST(InitializersTest, Ones) {
   auto s = aml::make_shape(3, 1);
   auto a = aml::ones<float, 2>(aml::CPU, s);
-  EXPECT_EQ(a.shape(), s);
+  EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);
   EXPECT_TRUE(a.is_contiguous());
   EXPECT_EQ(a.data()[0], 1.0f);
@@ -29,7 +29,7 @@ TEST(InitializersTest, Ones) {
 TEST(InitializersTest, NansFloat) {
   auto s = aml::make_shape(3, 1);
   auto a = aml::nans<float, 2>(aml::CPU, s);
-  EXPECT_EQ(a.shape(), s);
+  EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);
   EXPECT_TRUE(a.is_contiguous());
   EXPECT_TRUE(std::isnan(a.data()[0]));
@@ -40,7 +40,7 @@ TEST(InitializersTest, NansFloat) {
 TEST(InitializersTest, NansDouble) {
   auto s = aml::make_shape(3, 1);
   auto a = aml::nans<double, 2>(aml::CPU, s);
-  EXPECT_EQ(a.shape(), s);
+  EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);
   EXPECT_TRUE(a.is_contiguous());
   EXPECT_TRUE(std::isnan(a.data()[0]));

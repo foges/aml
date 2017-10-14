@@ -16,20 +16,20 @@ class ConstArray : public ImmutableArray<T, Dim> {
 public:
   ConstArray(std::shared_ptr<const Allocation> allocation,
              const T *data,
-             Shape<Dim> shape,
+             Shape<Dim> size,
              Shape<Dim> stride)
       : allocation_(allocation),
         data_(data),
-        shape_(shape),
+        size_(size),
         stride_(stride) { }
 
   ConstArray(const Array<T, Dim> &array)
       : ConstArray(array.allocation(),
                    array.data(),
-                   array.shape(),
+                   array.size(),
                    array.stride()) { }
 
-  ConstArray() : data_(nullptr), shape_(), stride_(impl::strides(shape_)) { }
+  ConstArray() : data_(nullptr), size_(), stride_(impl::strides(size_)) { }
 
   ~ConstArray() { }
 
@@ -45,8 +45,8 @@ public:
     return data_;
   }
 
-  Shape<Dim> shape() const {
-    return shape_;
+  Shape<Dim> size() const {
+    return size_;
   }
 
   Shape<Dim> stride() const {
@@ -54,7 +54,7 @@ public:
   }
 
   bool is_contiguous() const {
-    return stride_ == impl::strides(shape_);
+    return stride_ == impl::strides(size_);
   }
 
 private:
@@ -62,7 +62,7 @@ private:
 
   T const *data_;
 
-  Shape<Dim> shape_;
+  Shape<Dim> size_;
   Shape<Dim> stride_;
 };
 
@@ -76,7 +76,7 @@ template <typename T, int Dim>
 ConstArray<T, Dim> slice(const ImmutableArray<T, Dim> &array,
                          const Shape<Dim> &begin,
                          const Shape<Dim> &end) {
-  AML_ASSERT(end <= array.shape(), "Cannot slice outside of array");
+  AML_ASSERT(end <= array.size(), "Cannot slice outside of array");
   AML_ASSERT(begin <= end, "Slice begin must come before end");
 
   return ConstArray<T, Dim>(
@@ -88,8 +88,8 @@ ConstArray<T, Dim> slice(const ImmutableArray<T, Dim> &array,
 
 template <typename T, int DimOld, int DimNew>
 ConstArray<T, DimNew> reshape(const ImmutableArray<T, DimOld> &array,
-                              const Shape<DimNew> &shape) {
-  AML_ASSERT(array.shape().numel() == shape.numel(),
+                              const Shape<DimNew> &size) {
+  AML_ASSERT(array.size().numel() == size.numel(),
       "Reshape must keep the same number of elements");
   AML_ASSERT(array.is_contiguous(),
       "Cannot reshape non-contiguous arrays");
@@ -97,8 +97,8 @@ ConstArray<T, DimNew> reshape(const ImmutableArray<T, DimOld> &array,
   return ConstArray<T, DimNew>(
       array.allocation(),
       array.data(),
-      shape,
-      impl::strides(shape));
+      size,
+      impl::strides(size));
 }
 
 }  // namespace aml

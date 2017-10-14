@@ -15,22 +15,22 @@ namespace aml {
 template <typename T, int Dim>
 class Array : public ImmutableArray<T, Dim> {
 public:
-  Array(Device device, const Shape<Dim> &shape)
-      : allocation_(new Allocation(device, sizeof(T) * shape.numel())),
+  Array(Device device, const Shape<Dim> &size)
+      : allocation_(new Allocation(device, sizeof(T) * size.numel())),
         data_(static_cast<T*>(allocation_->data())),
-        shape_(shape),
-        stride_(impl::strides(shape)){ }
+        size_(size),
+        stride_(impl::strides(size)){ }
 
   Array(const std::shared_ptr<Allocation> &allocation,
         T *data,
-        const Shape<Dim> &shape,
+        const Shape<Dim> &size,
         const Shape<Dim> &stride)
       : allocation_(allocation),
         data_(data),
-        shape_(shape),
+        size_(size),
         stride_(stride) { }
 
-  Array() : data_(nullptr), shape_(), stride_(impl::strides(shape_)) { }
+  Array() : data_(nullptr), size_(), stride_(impl::strides(size_)) { }
 
   ~Array() { }
 
@@ -55,8 +55,8 @@ public:
     return data_;
   }
 
-  Shape<Dim> shape() const {
-    return shape_;
+  Shape<Dim> size() const {
+    return size_;
   }
 
   Shape<Dim> stride() const {
@@ -64,7 +64,7 @@ public:
   }
 
   bool is_contiguous() const {
-    return stride_ == impl::strides(shape_);
+    return stride_ == impl::strides(size_);
   }
 
 private:
@@ -72,7 +72,7 @@ private:
 
   T *data_;
 
-  Shape<Dim> shape_;
+  Shape<Dim> size_;
   Shape<Dim> stride_;
 };
 
@@ -83,10 +83,10 @@ template <typename T>
 using Matrix = Array<T, 2>;
 
 template <typename T, int Dim>
-Array<T, Dim> make_array(const std::vector<T> data, const Shape<Dim> &shape) {
-  AML_ASSERT(data.size() == shape.numel(), "Number of elements must match");
+Array<T, Dim> make_array(const std::vector<T> data, const Shape<Dim> &size) {
+  AML_ASSERT(data.size() == size.numel(), "Number of elements must match");
 
-  Array<T, Dim> array(aml::CPU, shape);
+  Array<T, Dim> array(aml::CPU, size);
   std::copy(data.begin(), data.end(), array.data());
 
   return array;
@@ -94,8 +94,8 @@ Array<T, Dim> make_array(const std::vector<T> data, const Shape<Dim> &shape) {
 
 template <typename T, int Dim>
 Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
-  AML_ASSERT(begin <= array.shape(), "Cannot slice outside of array");
-  AML_ASSERT(end <= array.shape(), "Cannot slice outside of array");
+  AML_ASSERT(begin <= array.size(), "Cannot slice outside of array");
+  AML_ASSERT(end <= array.size(), "Cannot slice outside of array");
   AML_ASSERT(begin <= end, "Slice begin must come before end");
 
   return Array<T, Dim>(
@@ -106,8 +106,8 @@ Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
 }
 
 template <typename T, int DimOld, int DimNew>
-Array<T, DimNew> reshape(Array<T, DimOld> array, Shape<DimNew> shape) {
-  AML_ASSERT(array.shape().numel() == shape.numel(),
+Array<T, DimNew> reshape(Array<T, DimOld> array, Shape<DimNew> size) {
+  AML_ASSERT(array.size().numel() == size.numel(),
       "Reshape must keep the same number of elements");
   AML_ASSERT(array.is_contiguous(),
       "Cannot reshape non-contiguous arrays");
@@ -115,8 +115,8 @@ Array<T, DimNew> reshape(Array<T, DimOld> array, Shape<DimNew> shape) {
   return Array<T, DimNew>(
       array.allocation(),
       array.data(),
-      shape,
-      impl::strides(shape));
+      size,
+      impl::strides(size));
 }
 
 }  // namespace aml

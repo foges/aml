@@ -18,7 +18,7 @@ public:
 
   virtual const T* data() const = 0;
 
-  virtual Shape<Dim> shape() const = 0;
+  virtual Shape<Dim> size() const = 0;
 
   virtual Shape<Dim> stride() const = 0;
 

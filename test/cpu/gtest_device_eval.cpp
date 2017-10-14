@@ -26,68 +26,68 @@ void no_return() { }
 }  // namespace impl
 }  // namespace aml
 
-TEST(DeviceEvalTestCpu, Number) {
+TEST(DeviceEvalTest, Number) {
   EXPECT_EQ(1, AML_DEVICE_EVAL(aml::CPU, number()));
 }
 
-TEST(DeviceEvalTestCpu, NumberVariable) {
+TEST(DeviceEvalTest, NumberVariable) {
   int x = 1;
   EXPECT_EQ(1, AML_DEVICE_EVAL(aml::CPU, number_return(x)));
 }
 
-TEST(DeviceEvalTestCpu, NumberArg) {
+TEST(DeviceEvalTest, NumberArg) {
   EXPECT_EQ(8, AML_DEVICE_EVAL(aml::CPU, number_return(8)));
   EXPECT_EQ(0, AML_DEVICE_EVAL(aml::CPU, number_return(0)));
 }
 
-TEST(DeviceEvalTestCpu, String) {
+TEST(DeviceEvalTest, String) {
   EXPECT_EQ("1", AML_DEVICE_EVAL(aml::CPU, string()));
 }
 
-TEST(DeviceEvalTestCpu, StringVariable) {
+TEST(DeviceEvalTest, StringVariable) {
   std::string x = "s";
   EXPECT_EQ("s", AML_DEVICE_EVAL(aml::CPU, string_return(x)));
 }
 
-TEST(DeviceEvalTestCpu, StringArg) {
+TEST(DeviceEvalTest, StringArg) {
   EXPECT_EQ("a", AML_DEVICE_EVAL(aml::CPU, string_return("a")));
   EXPECT_EQ("bb", AML_DEVICE_EVAL(aml::CPU, string_return("bb")));
 }
 
-TEST(DeviceEvalTestCpu, NoReturn) {
+TEST(DeviceEvalTest, NoReturn) {
   AML_DEVICE_EVAL(aml::CPU, no_return());
 }
 
 #ifdef AML_GPU
-TEST(DeviceEvalTestGpu, Number) {
+TEST(DeviceEvalTest, GpuNumber) {
   EXPECT_EQ(2, AML_DEVICE_EVAL(aml::GPU, number()));
 }
 
-TEST(DeviceEvalTestGpu, NumberVariable) {
+TEST(DeviceEvalTestGpu, GpuNumberVariable) {
   int x = 1;
   EXPECT_EQ(1, AML_DEVICE_EVAL(aml::GPU, number_return(x)));
 }
 
-TEST(DeviceEvalTestGpu, NumberArg) {
+TEST(DeviceEvalTestGpu, GpuNumberArg) {
   EXPECT_EQ(3, AML_DEVICE_EVAL(aml::GPU, number_return(3)));
   EXPECT_EQ(9, AML_DEVICE_EVAL(aml::GPU, number_return(9)));
 }
 
-TEST(DeviceEvalTestGpu, String) {
+TEST(DeviceEvalTestGpu, GpuString) {
   EXPECT_EQ("2", AML_DEVICE_EVAL(aml::GPU, string()));
 }
 
-TEST(DeviceEvalTestGpu, StringVariable) {
+TEST(DeviceEvalTestGpu, GpuStringVariable) {
   std::string x = "s";
   EXPECT_EQ("s", AML_DEVICE_EVAL(aml::GPU, string_return(x)));
 }
 
-TEST(DeviceEvalTestGpu, StringArg) {
+TEST(DeviceEvalTestGpu, GpuStringArg) {
   EXPECT_EQ("a", AML_DEVICE_EVAL(aml::GPU, string_return("a")));
   EXPECT_EQ("bb", AML_DEVICE_EVAL(aml::GPU, string_return("bb")));
 }
 
-TEST(DeviceEvalTestGpu, NoReturn) {
+TEST(DeviceEvalTestGpu, GpuNoReturn) {
   AML_DEVICE_EVAL(aml::GPU, no_return());
 }
 #endif
