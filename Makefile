@@ -10,19 +10,18 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Linux)
   CC=g++
   CUDA_LIB_DIR=${CUDA_DIR}/lib64
-  LDFLAGS=-lblas
-  GTEST_DIR=/Users/chris/code/libs/googletest/googletest
+  LDFLAGS=-lblas -pthread
+  GTEST_DIR=/home/fougner/libs/googletest/googletest
 endif
 ifeq ($(UNAME_S), Darwin)
   CC=clang++
   CUDA_LIB_DIR=${CUDA_DIR}/lib
   LDFLAGS=-framework Accelerate
-  GTEST_DIR=/home/fougner/libs/googletest/googletest
+  GTEST_DIR=/Users/chris/code/libs/googletest/googletest
 endif
 
 # Compilation
 FLAGS=-std=c++11 -Wall -Wextra ${EXTRA_FLAGS}
-LDFLAGS += -pthread
 DEPS=-Iinclude -isystem ${GTEST_DIR}/include
 
 NVCC=nvcc -ccbin=${CC}
