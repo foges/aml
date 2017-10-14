@@ -49,6 +49,7 @@ TEST(OperationsTest, GpuCopyTypeCast) {
   auto a = aml::make_array(data, aml::make_shape(2, 2));
   auto b = aml::Array<double, 2>(aml::GPU, a.size());
   auto c = aml::Array<int, 2>(aml::GPU, a.size());
+  aml::copy(a, b);
   aml::copy(b, c);
   auto c_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
   aml::copy(c, c_h);
@@ -67,7 +68,7 @@ TEST(OperationsTest, GpuCopyNonContiguous) {
   auto b = aml::slice(a, aml::make_shape(1, 0), aml::make_shape(2, 2));
   auto c = aml::Array<int, 2>(aml::GPU, b.size());
   aml::copy(b, c);
-  auto c_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
+  auto c_h = aml::Array<int, 2>(aml::CPU, c.size());
   aml::copy(c, c_h);
 
   EXPECT_EQ(c_h.data()[0], 2);
@@ -182,15 +183,15 @@ TEST(OperationsTest, GpuReducePartial1Max) {
   aml::copy(out_h, out);
   aml::reduce(in, out, {{0, 3, 2}}, aml::Identity(), aml::Max());
   aml::copy(out, out_h);
-  EXPECT_EQ(out.data()[0], 4);
-  EXPECT_EQ(out.data()[1], 7);
+  EXPECT_EQ(out_h.data()[0], 4);
+  EXPECT_EQ(out_h.data()[1], 7);
 }
 
 TEST(OperationsTest, GpuReducePartial2Max) {
   std::vector<int> data = {4, 7, -3, -9};
   std::vector<int> res = {-10, -10};
-  auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
-  auto in_h = aml::Array<int, 4>(aml::GPU, in.size());
+  auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
+  auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
   auto out_h = aml::make_array(res, aml::make_shape(2));
   auto out = aml::Array<int, 1>(aml::GPU, out_h.size());
   aml::copy(in_h, in);

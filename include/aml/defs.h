@@ -48,6 +48,18 @@
     AML_ASSERT(error == cudaSuccess, cudaGetErrorString(error)); \
   } while(0)
 
+#define CUDA_CHECK_ERR() \
+  do { \
+    cudaError_t error = cudaGetLastError(); \
+    if (error != cudaSuccess) { \
+      std::cout << __FILE__ << ":" << __LINE__ << ":" \
+                << __func__ << "\n" \
+                << "ERROR_CUDA: " << cudaGetErrorString(error) \
+                << std::endl; \
+      exit(EXIT_FAILURE); \
+    } \
+  } while (0)
+
 #else
 
 #define AML_HOST_DEVICE

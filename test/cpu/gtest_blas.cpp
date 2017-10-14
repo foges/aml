@@ -1,3 +1,4 @@
+#include <cmath>
 #include <vector>
 
 #include <gtest/gtest.h>
@@ -108,7 +109,7 @@ TEST_F(BlasTest, GemmDoubleTT) {
 TEST_F(BlasTest, Norm2Float) {
   auto x = aml::reshape(Af, aml::make_shape(4));
   float nrm2 = aml::nrm2(h, x);
-  EXPECT_EQ(nrm2, std::sqrtf(39.0f));
+  EXPECT_EQ(nrm2, std::sqrt(39.0f));
 }
 
 TEST_F(BlasTest, Norm2Double) {

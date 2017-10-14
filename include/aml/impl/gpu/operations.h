@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include <aml/array.h>
 #include <aml/defs.h>
 #include <aml/immutable_array.h>
@@ -185,9 +186,10 @@ void reduce(const ImmutableArray<Tin, DimIn> &in,
   for (int i = 0; i < DimIn - DimOut; ++i) {
     size_r_shape[i] = in.size()[axis[i]];
   }
-  auto dims = launch_dims(out.size().numel() * 32, sizeof(Tout));
+  int grid_dim = std::min<int>(out.size().numel(), 32 * 28);
+  int block_dim = std::min(256, std::min<int>(49152 / sizeof(Tout), 32 * out.size().numel() / grid_dim));
 
-  reduce<<<dims.first, dims.second, dims.second * sizeof(Tout)>>>(
+  reduce<<<grid_dim, block_dim, block_dim * sizeof(Tout)>>>(
       in.data(), out.data(), in.size(), out.size(), in.stride(), out.stride(),
       axis_shape, axis_nr_shape, size_r_shape, op_t, op_r);
 }

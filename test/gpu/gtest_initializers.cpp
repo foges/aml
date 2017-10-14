@@ -11,7 +11,7 @@ TEST(InitializersTest, GpuZeros) {
   aml::copy(a, a_h);
 
   EXPECT_EQ(a.size(), s);
-  EXPECT_EQ(a.device(), aml::CPU);
+  EXPECT_EQ(a.device(), aml::GPU);
   EXPECT_TRUE(a.is_contiguous());
   EXPECT_EQ(a_h.data()[0], 0.0f);
   EXPECT_EQ(a_h.data()[1], 0.0f);

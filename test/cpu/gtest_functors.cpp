@@ -11,7 +11,7 @@ TEST(FunctorTest, Abs) {
 }
 
 TEST(FunctorTest, Exp) {
-  EXPECT_EQ(aml::Exp()(-0.5f), std::expf(-0.5f));
+  EXPECT_EQ(aml::Exp()(-0.5f), std::exp(-0.5f));
   EXPECT_EQ(aml::Exp()(-0.5), std::exp(-0.5));
 }
 
@@ -28,7 +28,7 @@ TEST(FunctorTest, Inv) {
 }
 
 TEST(FunctorTest, Log) {
-  EXPECT_EQ(aml::Log()(0.5f), std::logf(0.5f));
+  EXPECT_EQ(aml::Log()(0.5f), std::log(0.5f));
   EXPECT_EQ(aml::Log()(0.5), std::log(0.5));
 }
 

@@ -6,7 +6,7 @@ TEST(AllocationTest, GpuSize0) {
   const aml::Allocation a(aml::GPU, 0);;
   EXPECT_EQ(a.size(), static_cast<size_t>(0));
   EXPECT_EQ(a.data(), nullptr);
-  EXPECT_EQ(a.device(), aml::CPU);
+  EXPECT_EQ(a.device(), aml::GPU);
 }
 
 TEST(AllocationTest, GpuSize2) {

@@ -1,22 +1,35 @@
 # Set variables here
 CUDA_DIR=/usr/local/cuda
-GTEST_DIR=/Users/chris/code/libs/googletest/googletest
 
-EXTRA_FLAGS=-DAML_DEBUG
+EXTRA_FLAGS=-DAML_DEBUG -g
 
-CUDA_ARCH=sm_53
+CUDA_ARCH=sm_52
+
+# OS Specific
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S), Linux)
+  CC=g++
+  CUDA_LIB_DIR=${CUDA_DIR}/lib64
+  LDFLAGS=-lblas
+  GTEST_DIR=/Users/chris/code/libs/googletest/googletest
+endif
+ifeq ($(UNAME_S), Darwin)
+  CC=clang++
+  CUDA_LIB_DIR=${CUDA_DIR}/lib
+  LDFLAGS=-framework Accelerate
+  GTEST_DIR=/home/fougner/libs/googletest/googletest
+endif
 
 # Compilation
-CC=clang++
 FLAGS=-std=c++11 -Wall -Wextra ${EXTRA_FLAGS}
-LDFLAGS=-framework Accelerate
+LDFLAGS += -pthread
 DEPS=-Iinclude -isystem ${GTEST_DIR}/include
 
-NVCC=nvcc
+NVCC=nvcc -ccbin=${CC}
 NVFLAGS=-std=c++11 -arch ${CUDA_ARCH} --compiler-options -Wall,-Wextra \
     ${EXTRA_FLAGS} -DAML_GPU -x cu
 NVDEPS=-isystem ${CUDA_DIR}/include
-CUDA_FLAGS=-L${CUDA_DIR}/lib -lcuda -lcudart -lcublas
+CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas
 
 TESTS=$(wildcard test/cpu/gtest_*.cpp)
 NVTESTS=$(wildcard test/gpu/gtest_*.cpp)
@@ -33,15 +46,15 @@ testcpu: build/cpu/test
 
 .PHONY: testgpu
 testgpu: build/gpu/test
-	DYLD_LIBRARY_PATH=${CUDA_DIR}/lib $^
+	DYLD_LIBRARY_PATH=${CUDA_LIB_DIR} $^
 
 .PHONY: build/cpu/test
-build/cpu/test: ${OBJECTS} build/gtest/libgtest.a build/gtest/main.o
-	${CC} ${LDFLAGS} $^ -o $@
+build/cpu/test: ${OBJECTS} build/gtest/main.o build/gtest/libgtest.a
+	${CC} $^ ${LDFLAGS} -o $@
 
 .PHONY: build/gpu/test
-build/gpu/test: ${NVOBJECTS} build/gtest/libgtest.a build/gtest/main.o
-	${CC} ${LDFLAGS} ${CUDA_FLAGS} $^ -o $@
+build/gpu/test: ${NVOBJECTS} build/gtest/main.o build/gtest/libgtest.a
+	${CC} $^ ${LDFLAGS} ${CUDA_LDFLAGS} -o $@
 
 build/cpu/%.o: test/cpu/%.cpp build/cpu
 	${CC} ${DEPS} ${FLAGS} $< -c -o $@
@@ -52,8 +65,8 @@ build/gpu/cpu/%.o: test/cpu/%.cpp build/gpu
 build/gpu/gpu/%.o: test/gpu/%.cpp build/gpu
 	${NVCC} ${DEPS} ${NVDEPS} ${NVFLAGS} $< -c -o $@
 
-build/gtest/main.o: ${GTEST_DIR}/src/gtest_main.cc
-	${CC} -I${GTEST_DIR}/include $^ -c -o $@
+build/gtest/main.o: ${GTEST_DIR}/src/gtest_main.cc build/gtest
+	${CC} -I${GTEST_DIR}/include $< -c -o $@
 
 build/gtest/libgtest.a: build/gtest
 	${CC} -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c \
