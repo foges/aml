@@ -1,6 +1,7 @@
 #pragma once
 
 #include <aml/array.h>
+#include <aml/handle.h>
 #include <aml/immutable_array.h>
 #include <aml/impl/cpu/operations.h>
 
@@ -14,9 +15,11 @@ namespace impl {
 #ifdef AML_GPU
 
 template <typename Tin, typename Tout, int Dim>
-void copy(const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
+void copy(Handle h,
+          const ImmutableArray<Tin, Dim> &in,
+          Array<Tout, Dim> &out) {
   if (in.device() == aml::CPU && out.device() == aml::CPU) {
-    cpu::copy(in, out);
+    cpu::copy(h, in, out);
   } else {
     if (in.device() != out.device()) {
         AML_ASSERT(in.is_contiguous() && out.is_contiguous(),
@@ -25,15 +28,17 @@ void copy(const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
             "Cannot copy arrays of different types between devices");
     }
 
-    gpu::copy(in, out);
+    gpu::copy(h, in, out);
   }
 }
 
 #else
 
 template <typename Tin, typename Tout, int Dim>
-void copy(const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
-  cpu::copy(in, out);
+void copy(Handle h,
+          const ImmutableArray<Tin, Dim> &in,
+          Array<Tout, Dim> &out) {
+  cpu::copy(h, in, out);
 }
 
 #endif

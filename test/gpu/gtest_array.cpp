@@ -2,7 +2,7 @@
 
 #include <aml/aml.h>
 
-TEST(ArrayTest, GpuConstructor) {
+TEST(ArrayTestGpu, Constructor) {
   aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
   EXPECT_EQ(a.device(), aml::GPU);
   EXPECT_NE(a.allocation(), nullptr);
@@ -13,7 +13,7 @@ TEST(ArrayTest, GpuConstructor) {
   EXPECT_TRUE(a.is_contiguous());
 }
 
-TEST(ArrayTest, GpuSlice) {
+TEST(ArrayTestGpu, Slice) {
   aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
   aml::Array<float, 2> s =
       aml::slice(a, aml::make_shape(1, 1), aml::make_shape(3, 4));
@@ -26,7 +26,7 @@ TEST(ArrayTest, GpuSlice) {
   EXPECT_FALSE(s.is_contiguous());
 }
 
-TEST(ArrayTest, GpuContiguousSlice) {
+TEST(ArrayTestGpu, ContiguousSlice) {
   aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
   aml::Array<float, 2> s =
       aml::slice(a, aml::make_shape(0, 2), aml::make_shape(3, 4));
@@ -39,7 +39,7 @@ TEST(ArrayTest, GpuContiguousSlice) {
   EXPECT_TRUE(s.is_contiguous());
 }
 
-TEST(ArrayTest, GpuReshape) {
+TEST(ArrayTestGpu, Reshape) {
   aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
   aml::Array<float, 3> r =
       aml::reshape(a, aml::make_shape(6, 2, 1));

@@ -4,35 +4,38 @@
 
 #include <aml/array.h>
 #include <aml/defs.h>
+#include <aml/handle.h>
 #include <aml/impl/operations.h>
 #include <aml/shape.h>
 
 namespace aml {
 
 template <typename T, int Dim>
-void set(Array<T, Dim> &out, const T &val) {
-  AML_DEVICE_EVAL(out.device(), set(out, val));
+void set(Handle h, Array<T, Dim> &out, const T &val) {
+  AML_DEVICE_EVAL(out.device(), set(h, out, val));
 }
 
 template <typename Tin, typename Tout, int Dim>
-void copy(const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
+void copy(Handle h, const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
   AML_ASSERT(in.size() == out.size(), "Shape mismatch");
 
-  impl::copy(in, out);
+  impl::copy(h, in, out);
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(const ImmutableArray<Tin, Dim> &in,
+void unary_op(Handle h,
+              const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
   AML_ASSERT(in.device() == out.device(), "Device mismatch");
   AML_ASSERT(in.size() == out.size(), "Shape mismatch");
 
-  AML_DEVICE_EVAL(in.device(), unary_op(in, out, op));
+  AML_DEVICE_EVAL(in.device(), unary_op(h, in, out, op));
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(const ImmutableArray<Tin1, Dim> &in1,
+void binary_op(Handle h,
+               const ImmutableArray<Tin1, Dim> &in1,
                const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
@@ -43,7 +46,7 @@ void binary_op(const ImmutableArray<Tin1, Dim> &in1,
       "Device mismatch");
   AML_ASSERT(size == in2.size() && size == out.size(), "Shape mismatch");
 
-  AML_DEVICE_EVAL(device, binary_op(in1, in2, out, op));
+  AML_DEVICE_EVAL(device, binary_op(h, in1, in2, out, op));
 }
 
 template <typename Tin,
@@ -52,7 +55,8 @@ template <typename Tin,
           int DimOut,
           typename TransformOp,
           typename ReduceOp>
-void reduce(const ImmutableArray<Tin, DimIn> &in,
+void reduce(Handle h,
+            const ImmutableArray<Tin, DimIn> &in,
             Array<Tout, DimOut> &out,
             const std::array<int, DimIn - DimOut> &axis,
             const TransformOp &op_t,
@@ -78,7 +82,7 @@ void reduce(const ImmutableArray<Tin, DimIn> &in,
 
   AML_DEVICE_EVAL(in.device(),
       reduce<Tin, DimIn, Tout, DimOut, TransformOp, ReduceOp>(
-      in, out, axis, axis_nr, op_t, op_r));
+      h, in, out, axis, axis_nr, op_t, op_r));
 }
 
 }  // namespace aml

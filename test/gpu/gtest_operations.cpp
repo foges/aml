@@ -2,11 +2,25 @@
 
 #include <aml/aml.h>
 
-TEST(OperationsTest, GpuSet) {
+class OperationsTestGpu : public ::testing::Test {
+public:
+  OperationsTestGpu() {
+    h.init();
+  }
+
+  ~OperationsTestGpu() {
+    h.destroy();
+  }
+
+protected:
+  aml::Handle h;
+};
+
+TEST_F(OperationsTestGpu, Set) {
   auto a = aml::Array<int, 4>(aml::GPU, aml::make_shape(1, 2, 1, 2));
-  aml::set(a, 9);
+  aml::set(h, a, 9);
   auto a_h = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 1, 2));
-  aml::copy(a, a_h);
+  aml::copy(h, a, a_h);
 
   EXPECT_EQ(a_h.data()[0], 9);
   EXPECT_EQ(a_h.data()[1], 9);
@@ -14,13 +28,13 @@ TEST(OperationsTest, GpuSet) {
   EXPECT_EQ(a_h.data()[3], 9);
 }
 
-TEST(OperationsTest, GpuCopyCpuGpu) {
+TEST_F(OperationsTestGpu, CopyCpu) {
   std::vector<int> data = {4, 2, 3, -9};
   auto a = aml::make_array(data, aml::make_shape(2, 2));
   auto b = aml::Array<int, 2>(aml::GPU, a.size());
-  aml::copy(a, b);
+  aml::copy(h, a, b);
   auto b_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
-  aml::copy(b, b_h);
+  aml::copy(h, b, b_h);
 
   EXPECT_EQ(b_h.data()[0], 4);
   EXPECT_EQ(b_h.data()[1], 2);
@@ -28,15 +42,15 @@ TEST(OperationsTest, GpuCopyCpuGpu) {
   EXPECT_EQ(b_h.data()[3], -9);
 }
 
-TEST(OperationsTest, GpuCopyGpuGpu) {
+TEST_F(OperationsTestGpu, Copy) {
   std::vector<int> data = {4, 2, 3, -9};
   auto a = aml::make_array(data, aml::make_shape(2, 2));
   auto b = aml::Array<int, 2>(aml::GPU, a.size());
   auto c = aml::Array<int, 2>(aml::GPU, a.size());
-  aml::copy(a, b);
-  aml::copy(b, c);
+  aml::copy(h, a, b);
+  aml::copy(h, b, c);
   auto c_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
-  aml::copy(c, c_h);
+  aml::copy(h, c, c_h);
 
   EXPECT_EQ(c_h.data()[0], 4);
   EXPECT_EQ(c_h.data()[1], 2);
@@ -44,15 +58,15 @@ TEST(OperationsTest, GpuCopyGpuGpu) {
   EXPECT_EQ(c_h.data()[3], -9);
 }
 
-TEST(OperationsTest, GpuCopyTypeCast) {
+TEST_F(OperationsTestGpu, CopyTypeCast) {
   std::vector<double> data = {4.0, 2.0, 3.0, -9.0};
   auto a = aml::make_array(data, aml::make_shape(2, 2));
   auto b = aml::Array<double, 2>(aml::GPU, a.size());
   auto c = aml::Array<int, 2>(aml::GPU, a.size());
-  aml::copy(a, b);
-  aml::copy(b, c);
+  aml::copy(h, a, b);
+  aml::copy(h, b, c);
   auto c_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
-  aml::copy(c, c_h);
+  aml::copy(h, c, c_h);
 
   EXPECT_EQ(c_h.data()[0], 4);
   EXPECT_EQ(c_h.data()[1], 2);
@@ -60,35 +74,35 @@ TEST(OperationsTest, GpuCopyTypeCast) {
   EXPECT_EQ(c_h.data()[3], -9);
 }
 
-TEST(OperationsTest, GpuCopyNonContiguous) {
+TEST_F(OperationsTestGpu, CopyNonContiguous) {
   std::vector<int> data = {4, 2, 3, -9};
   auto a_h = aml::make_array(data, aml::make_shape(2, 2));
   auto a = aml::Array<int, 2>(aml::GPU, a_h.size());
-  aml::copy(a_h, a);
+  aml::copy(h, a_h, a);
   auto b = aml::slice(a, aml::make_shape(1, 0), aml::make_shape(2, 2));
   auto c = aml::Array<int, 2>(aml::GPU, b.size());
-  aml::copy(b, c);
+  aml::copy(h, b, c);
   auto c_h = aml::Array<int, 2>(aml::CPU, c.size());
-  aml::copy(c, c_h);
+  aml::copy(h, c, c_h);
 
   EXPECT_EQ(c_h.data()[0], 2);
   EXPECT_EQ(c_h.data()[1], -9);
 }
 
-TEST(OperationsTest, GpuUnaryOpAbs) {
+TEST_F(OperationsTestGpu, UnaryOpAbs) {
   std::vector<int> data = {-4, 2, -3, -9};
   auto a_h = aml::make_array(data, aml::make_shape(1, 2, 1, 2));
   auto a = aml::Array<int, 4>(aml::GPU, a_h.size());
-  aml::copy(a_h, a);
-  aml::unary_op(a, a, aml::Abs());
-  aml::copy(a, a_h);
+  aml::copy(h, a_h, a);
+  aml::unary_op(h, a, a, aml::Abs());
+  aml::copy(h, a, a_h);
   EXPECT_EQ(a_h.data()[0], 4);
   EXPECT_EQ(a_h.data()[1], 2);
   EXPECT_EQ(a_h.data()[2], 3);
   EXPECT_EQ(a_h.data()[3], 9);
 }
 
-TEST(OperationsTest, GpuBinaryOpMax) {
+TEST_F(OperationsTestGpu, BinaryOpMax) {
   std::vector<int> data1 = {4, 5, 3, 7};
   std::vector<int> data2 = {8, 4, 1, 9};
   auto in1_h = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
@@ -97,17 +111,17 @@ TEST(OperationsTest, GpuBinaryOpMax) {
   auto in1 = aml::Array<int, 4>(aml::GPU, in1_h.size());
   auto in2 = aml::Array<int, 4>(aml::GPU, in2_h.size());
   auto out = aml::Array<int, 4>(aml::GPU, out_h.size());
-  aml::copy(in1_h, in1);
-  aml::copy(in2_h, in2);
-  aml::binary_op(in1, in2, out, aml::Max());
-  aml::copy(out, out_h);
+  aml::copy(h, in1_h, in1);
+  aml::copy(h, in2_h, in2);
+  aml::binary_op(h, in1, in2, out, aml::Max());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 8);
   EXPECT_EQ(out_h.data()[1], 5);
   EXPECT_EQ(out_h.data()[2], 3);
   EXPECT_EQ(out_h.data()[3], 9);
 }
 
-TEST(OperationsTest, GpuBinaryOpMaxSlice) {
+TEST_F(OperationsTestGpu, BinaryOpMaxSlice) {
   std::vector<int> data1 = {4, 5, 3, 7};
   std::vector<int> data2 = {8, 4, 1, 9};
   auto in1_h = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
@@ -120,43 +134,43 @@ TEST(OperationsTest, GpuBinaryOpMaxSlice) {
   auto in2s = aml::slice(in2, aml::make_shape(0, 1, 0, 0),
       aml::make_shape(1, 2, 2, 1));
   auto out = aml::Array<int, 4>(aml::GPU, out_h.size());
-  aml::copy(in1_h, in1);
-  aml::copy(in2_h, in2);
-  aml::binary_op(in1s, in2s, out, aml::Min());
-  aml::copy(out, out_h);
+  aml::copy(h, in1_h, in1);
+  aml::copy(h, in2_h, in2);
+  aml::binary_op(h, in1s, in2s, out, aml::Min());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 4);
   EXPECT_EQ(out_h.data()[1], 7);
 }
 
-TEST(OperationsTest, GpuReduceMax) {
+TEST_F(OperationsTestGpu, ReduceMax) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0};
   auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
   auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
   auto out_h = aml::make_array(res, aml::Shape<0>());
   auto out = aml::Array<int, 0>(aml::GPU, out_h.size());
-  aml::copy(in_h, in);
-  aml::copy(out_h, out);
-  aml::reduce(in, out, {{0, 1, 3, 2}}, aml::Identity(), aml::Max());
-  aml::copy(out, out_h);
+  aml::copy(h, in_h, in);
+  aml::copy(h, out_h, out);
+  aml::reduce(h, in, out, {{0, 1, 3, 2}}, aml::Identity(), aml::Max());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 7);
 }
 
-TEST(OperationsTest, GpuReduceMaxAbs) {
+TEST_F(OperationsTestGpu, ReduceMaxAbs) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0};
   auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
   auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
   auto out_h = aml::make_array(res, aml::Shape<0>());
   auto out = aml::Array<int, 0>(aml::GPU, out_h.size());
-  aml::copy(in_h, in);
-  aml::copy(out_h, out);
-  aml::reduce(in, out, {{0, 1, 3, 2}}, aml::Abs(), aml::Max());
-  aml::copy(out, out_h);
+  aml::copy(h, in_h, in);
+  aml::copy(h, out_h, out);
+  aml::reduce(h, in, out, {{0, 1, 3, 2}}, aml::Abs(), aml::Max());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 9);
 }
 
-TEST(OperationsTest, GpuReduceMaxAbsSlice) {
+TEST_F(OperationsTestGpu, ReduceMaxAbsSlice) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0};
   auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
@@ -165,44 +179,44 @@ TEST(OperationsTest, GpuReduceMaxAbsSlice) {
       aml::make_shape(1, 1, 2, 1));
   auto out_h = aml::make_array(res, aml::Shape<0>());
   auto out = aml::Array<int, 0>(aml::GPU, out_h.size());
-  aml::copy(in_h, in);
-  aml::copy(out_h, out);
-  aml::reduce(ins, out, {{3, 1, 0, 2}}, aml::Abs(), aml::Max());
-  aml::copy(out, out_h);
+  aml::copy(h, in_h, in);
+  aml::copy(h, out_h, out);
+  aml::reduce(h, ins, out, {{3, 1, 0, 2}}, aml::Abs(), aml::Max());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 4);
 }
 
-TEST(OperationsTest, GpuReducePartial1Max) {
+TEST_F(OperationsTestGpu, ReducePartial1Max) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0, 0};
   auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
   auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
   auto out_h = aml::make_array(res, aml::make_shape(2));
   auto out = aml::Array<int, 1>(aml::GPU, out_h.size());
-  aml::copy(in_h, in);
-  aml::copy(out_h, out);
-  aml::reduce(in, out, {{0, 3, 2}}, aml::Identity(), aml::Max());
-  aml::copy(out, out_h);
+  aml::copy(h, in_h, in);
+  aml::copy(h, out_h, out);
+  aml::reduce(h, in, out, {{0, 3, 2}}, aml::Identity(), aml::Max());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 4);
   EXPECT_EQ(out_h.data()[1], 7);
 }
 
-TEST(OperationsTest, GpuReducePartial2Max) {
+TEST_F(OperationsTestGpu, ReducePartial2Max) {
   std::vector<int> data = {4, 7, -3, -9};
   std::vector<int> res = {-10, -10};
   auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
   auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
   auto out_h = aml::make_array(res, aml::make_shape(2));
   auto out = aml::Array<int, 1>(aml::GPU, out_h.size());
-  aml::copy(in_h, in);
-  aml::copy(out_h, out);
-  aml::reduce(in, out, {{0, 3, 1}}, aml::Identity(), aml::Max());
-  aml::copy(out, out_h);
+  aml::copy(h, in_h, in);
+  aml::copy(h, out_h, out);
+  aml::reduce(h, in, out, {{0, 3, 1}}, aml::Identity(), aml::Max());
+  aml::copy(h, out, out_h);
   EXPECT_EQ(out_h.data()[0], 7);
   EXPECT_EQ(out_h.data()[1], -3);
 }
 
-TEST(OperationsTest, GpuReducePartialSliceSumLarge) {
+TEST_F(OperationsTestGpu, ReducePartialSliceSumLarge) {
   size_t M = 52;
   size_t N = 2 * M;
   std::vector<int> data(N * M);
@@ -229,20 +243,21 @@ TEST(OperationsTest, GpuReducePartialSliceSumLarge) {
   auto out1s_h = aml::make_array(res1s, aml::make_shape(N / 2));
   auto out1s = aml::Array<int, 1>(aml::GPU, out1s_h.size());
 
-  aml::copy(in_h, in);
-  aml::copy(out0_h, out0);
-  aml::copy(out1_h, out1);
-  aml::copy(out0s_h, out0s);
-  aml::copy(out1s_h, out1s);
+  aml::copy(h, in_h, in);
+  aml::copy(h, out0_h, out0);
+  aml::copy(h, out1_h, out1);
+  aml::copy(h, out0s_h, out0s);
+  aml::copy(h, out1s_h, out1s);
 
-  aml::reduce(in, out0, {{0, 3, 2}}, aml::Abs(), aml::Plus());
-  aml::reduce(in, out1, {{0, 1, 2}}, aml::Abs(), aml::Plus());
-  aml::reduce(ins, out0s, {{0, 3, 2}}, aml::Abs(), aml::Plus());
-  aml::reduce(ins, out1s, {{0, 1, 2}}, aml::Abs(), aml::Plus());
-  aml::copy(out0, out0_h);
-  aml::copy(out1, out1_h);
-  aml::copy(out0s, out0s_h);
-  aml::copy(out1s, out1s_h);
+  aml::reduce(h, in, out0, {{0, 3, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(h, in, out1, {{0, 1, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(h, ins, out0s, {{0, 3, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(h, ins, out1s, {{0, 1, 2}}, aml::Abs(), aml::Plus());
+
+  aml::copy(h, out0, out0_h);
+  aml::copy(h, out1, out1_h);
+  aml::copy(h, out0s, out0s_h);
+  aml::copy(h, out1s, out1s_h);
 
   for (size_t i = 0; i < M; ++i) {
     ASSERT_EQ(out0_h.data()[i], N * (N + 1) / 2);

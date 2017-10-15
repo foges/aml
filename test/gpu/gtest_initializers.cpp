@@ -4,11 +4,25 @@
 
 #include <aml/aml.h>
 
-TEST(InitializersTest, GpuZeros) {
+class InitializersTestGpu : public ::testing::Test {
+public:
+  InitializersTestGpu() {
+    h.init();
+  }
+
+  ~InitializersTestGpu() {
+    h.destroy();
+  }
+
+protected:
+  aml::Handle h;
+};
+
+TEST_F(InitializersTestGpu, Zeros) {
   auto s = aml::make_shape(3, 1);
-  auto a = aml::zeros<float, 2>(aml::GPU, s);
+  auto a = aml::zeros<float, 2>(h, aml::GPU, s);
   auto a_h = aml::Array<float, 2>(aml::CPU, s);
-  aml::copy(a, a_h);
+  aml::copy(h, a, a_h);
 
   EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::GPU);
@@ -18,11 +32,11 @@ TEST(InitializersTest, GpuZeros) {
   EXPECT_EQ(a_h.data()[2], 0.0f);
 }
 
-TEST(InitializersTest, GpuOnes) {
+TEST_F(InitializersTestGpu, Ones) {
   auto s = aml::make_shape(3, 1);
-  auto a = aml::ones<float, 2>(aml::CPU, s);
+  auto a = aml::ones<float, 2>(h, aml::CPU, s);
   auto a_h = aml::Array<float, 2>(aml::CPU, s);
-  aml::copy(a, a_h);
+  aml::copy(h, a, a_h);
 
   EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);
@@ -32,11 +46,11 @@ TEST(InitializersTest, GpuOnes) {
   EXPECT_EQ(a_h.data()[2], 1.0f);
 }
 
-TEST(InitializersTest, GpuNansFloat) {
+TEST_F(InitializersTestGpu, NansFloat) {
   auto s = aml::make_shape(3, 1);
-  auto a = aml::nans<float, 2>(aml::CPU, s);
+  auto a = aml::nans<float, 2>(h, aml::CPU, s);
   auto a_h = aml::Array<float, 2>(aml::CPU, s);
-  aml::copy(a, a_h);
+  aml::copy(h, a, a_h);
 
   EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);
@@ -46,11 +60,11 @@ TEST(InitializersTest, GpuNansFloat) {
   EXPECT_TRUE(std::isnan(a_h.data()[2]));
 }
 
-TEST(InitializersTest, GpuNansDouble) {
+TEST_F(InitializersTestGpu, NansDouble) {
   auto s = aml::make_shape(3, 1);
-  auto a = aml::nans<double, 2>(aml::CPU, s);
+  auto a = aml::nans<double, 2>(h, aml::CPU, s);
   auto a_h = aml::Array<double, 2>(aml::CPU, s);
-  aml::copy(a, a_h);
+  aml::copy(h, a, a_h);
 
   EXPECT_EQ(a.size(), s);
   EXPECT_EQ(a.device(), aml::CPU);

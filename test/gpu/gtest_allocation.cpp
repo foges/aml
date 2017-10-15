@@ -2,14 +2,14 @@
 
 #include <aml/aml.h>
 
-TEST(AllocationTest, GpuSize0) {
+TEST(AllocationTestGpu, Size0) {
   const aml::Allocation a(aml::GPU, 0);;
   EXPECT_EQ(a.size(), static_cast<size_t>(0));
   EXPECT_EQ(a.data(), nullptr);
   EXPECT_EQ(a.device(), aml::GPU);
 }
 
-TEST(AllocationTest, GpuSize2) {
+TEST(AllocationTestGpu, Size2) {
   aml::Allocation a(aml::GPU, 2 * sizeof(int));;
 
   cudaPointerAttributes attr;
@@ -21,7 +21,7 @@ TEST(AllocationTest, GpuSize2) {
   EXPECT_EQ(a.device(), aml::GPU);
 }
 
-TEST(AllocationTest, GpuFree) {
+TEST(AllocationTestGpu, Free) {
   aml::Allocation a(aml::GPU, sizeof(int));
 
   EXPECT_EQ(a.size(), sizeof(int));

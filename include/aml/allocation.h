@@ -2,6 +2,7 @@
 
 #include <aml/defs.h>
 #include <aml/device.h>
+#include <aml/handle.h>
 #include <aml/impl/allocation.h>
 
 namespace aml {
@@ -29,9 +30,8 @@ public:
     }
   }
 
-  // TODO: What's the best way to do this?
   Allocation(const Allocation&) = delete;
-  Allocation& operator=(const Allocation&) = delete;	
+  Allocation& operator=(const Allocation&) = delete;
 
   void* data() { return data_; }
 

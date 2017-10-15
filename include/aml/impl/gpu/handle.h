@@ -13,6 +13,10 @@ class Handle {
 public:
   Handle() : workspace_(nullptr), workspace_size_(0) {
     {
+      cudaError_t stat = cudaGetDeviceProperties(&device_properties_, 0);
+      AML_ASSERT(stat == cudaSuccess, "Could not get device properties");
+    }
+    {
       cublasStatus_t stat = cublasCreate(&h_cublas_);
       AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS,
           "CuBLAS initialization failed");
@@ -22,8 +26,6 @@ public:
       AML_ASSERT(stat == CUSOLVER_STATUS_SUCCESS,
           "CuSolverDn initialization failed");
     }
-
-
   }
 
   ~Handle() {
@@ -41,7 +43,9 @@ public:
   }
 
   void clear() {
-    AML_GPU_CHECK(cudaFree(workspace_));
+    if (workspace_ != nullptr) {
+      AML_GPU_CHECK(cudaFree(workspace_));
+    }
     workspace_ = nullptr;
     workspace_size_ = 0;
   }
@@ -65,7 +69,19 @@ public:
     return static_cast<T*>(workspace_);
   }
 
+  int num_procs() const {
+    return device_properties_.multiProcessorCount;
+  }
+
+  int shared_mem_per_proc() const {
+    return 49152;
+  }
+
+  Handle(const Handle&) = delete;
+  Handle& operator=(const Handle&) = delete;
+
 private:
+  cudaDeviceProp device_properties_;
   cublasHandle_t h_cublas_;
   cusolverDnHandle_t h_cusolverdn_;
 

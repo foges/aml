@@ -1,8 +1,8 @@
 #pragma once
 
-#include <iostream>
 #include <aml/array.h>
 #include <aml/defs.h>
+#include <aml/handle.h>
 #include <aml/immutable_array.h>
 #include <aml/impl/gpu/utils.h>
 #include <aml/shape.h>
@@ -24,8 +24,8 @@ __global__ void set(T *out, Shape<Dim> size, Shape<Dim> stride, T val) {
 }
 
 template <typename T, int Dim>
-void set(Array<T, Dim> &out, const T &val) {
-  auto dims = launch_dims(out.size().numel());
+void set(aml::Handle h, Array<T, Dim> &out, const T &val) {
+  auto dims = launch_dims(h.gpu(), out.size().numel());
   set<<<dims.first, dims.second>>>(out.data(), out.size(), out.stride(), val);
 }
 
@@ -49,10 +49,11 @@ __global__ void unary_op(const Tin *in,
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(const ImmutableArray<Tin, Dim> &in,
+void unary_op(aml::Handle h,
+              const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
-  auto dims = launch_dims(in.size().numel());
+  auto dims = launch_dims(h.gpu(), in.size().numel());
   unary_op<<<dims.first, dims.second>>>(
       in.data(), out.data(), in.size(), in.stride(), out.stride(), op);
 }
@@ -80,11 +81,12 @@ __global__ void binary_op(const Tin1 *in1,
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(const ImmutableArray<Tin1, Dim> &in1,
+void binary_op(aml::Handle h,
+               const ImmutableArray<Tin1, Dim> &in1,
                const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
-  auto dims = launch_dims(in1.size().numel());
+  auto dims = launch_dims(h.gpu(), in1.size().numel());
   binary_op<<<dims.first, dims.second>>>(
       in1.data(), in2.data(), out.data(), in1.size(),
       in1.stride(), in2.stride(), out.stride(), op);
@@ -167,7 +169,8 @@ template <typename Tin,
           int DimOut,
           typename TransformOp,
           typename ReduceOp>
-void reduce(const ImmutableArray<Tin, DimIn> &in,
+void reduce(aml::Handle h,
+            const ImmutableArray<Tin, DimIn> &in,
             Array<Tout, DimOut> &out,
             const std::array<int, DimIn - DimOut> &axis,
             const std::array<int, DimOut> &axis_nr,
@@ -189,8 +192,8 @@ void reduce(const ImmutableArray<Tin, DimIn> &in,
 
   Index numel = out.size().numel();
 
-  int num_proc = 28;
-  int sm_per_proc = 49152;
+  int num_proc = h.gpu()->num_procs();
+  int sm_per_proc = h.gpu()->shared_mem_per_proc();
   int sm_per_warp = 32 * sizeof(Tout);
   int max_warps_per_proc = sm_per_proc / sm_per_warp;
   AML_ASSERT(max_warps_per_proc >= 1, "Must have at least one warp per proc");
@@ -214,7 +217,7 @@ struct IdentityFunctor {
 };
 
 template <typename T, int Dim>
-void copy(const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
+void copy(aml::Handle h, const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
   if (in.is_contiguous() && out.is_contiguous()) {
     size_t count = in.size().numel() * sizeof(T);
     if (in.device() == aml::CPU && out.device() == aml::GPU) {
@@ -228,13 +231,15 @@ void copy(const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
           cudaMemcpyDeviceToDevice));
     }
   } else {
-    gpu::unary_op(in, out, IdentityFunctor<T, T>());
+    gpu::unary_op(h, in, out, IdentityFunctor<T, T>());
   }
 }
 
 template <typename Tin, typename Tout, int Dim>
-void copy(const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
-  gpu::unary_op(in, out, IdentityFunctor<Tin, Tout>());
+void copy(aml::Handle h,
+          const ImmutableArray<Tin, Dim> &in,
+          Array<Tout, Dim> &out) {
+  gpu::unary_op(h, in, out, IdentityFunctor<Tin, Tout>());
 }
 
 }  // namespace gpu
