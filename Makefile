@@ -28,7 +28,7 @@ NVCC=nvcc -ccbin=${CC}
 NVFLAGS=-std=c++11 -arch ${CUDA_ARCH} --compiler-options -Wall,-Wextra \
     ${EXTRA_FLAGS} -DAML_GPU -x cu
 NVDEPS=-isystem ${CUDA_DIR}/include
-CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas
+CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas -lcusolver
 
 TESTS=$(wildcard test/cpu/gtest_*.cpp)
 NVTESTS=$(wildcard test/gpu/gtest_*.cpp)
@@ -67,10 +67,11 @@ build/gpu/gpu/%.o: test/gpu/%.cpp build/gpu
 build/gtest/main.o: ${GTEST_DIR}/src/gtest_main.cc build/gtest
 	${CC} -I${GTEST_DIR}/include $< -c -o $@
 
-build/gtest/libgtest.a: build/gtest
-	${CC} -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c \
-	    ${GTEST_DIR}/src/gtest-all.cc -o build/gtest/gtest-all.o
-	ar -rv $@ build/gtest/gtest-all.o
+build/gtest/libgtest.a: build/gtest/gtest-all.o
+	ar -r $@ $<
+
+build/gtest/gtest-all.o: ${GTEST_DIR}/src/gtest-all.cc build/gtest
+	${CC} -isystem ${GTEST_DIR}/include -I${GTEST_DIR} -pthread -c $< -o $@
 
 build/gtest:
 	mkdir -p $@

@@ -51,56 +51,56 @@ protected:
 };
 
 TEST_F(BlasTest, GemmFloatNN) {
-  aml::gemm(h, aml::NO_TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 'n', 'n', 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CNN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmFloatTN) {
-  aml::gemm(h, aml::TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 't', 'n', 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CTN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmFloatNT) {
-  aml::gemm(h, aml::NO_TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 'n', 't', 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CNT[i]);
   }
 }
 
 TEST_F(BlasTest, GemmFloatTT) {
-  aml::gemm(h, aml::TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 't', 't', 1.0f, Af, Bf, 0.0f, Cf);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf.data()[i], CTT[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleNN) {
-  aml::gemm(h, aml::NO_TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 'n', 'n', 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CNN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleTN) {
-  aml::gemm(h, aml::TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 't', 'n', 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CTN[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleNT) {
-  aml::gemm(h, aml::NO_TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 'n', 't', 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CNT[i]);
   }
 }
 
 TEST_F(BlasTest, GemmDoubleTT) {
-  aml::gemm(h, aml::TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 't', 't', 1.0, Ad, Bd, 0.0, Cd);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd.data()[i], CTT[i]);
   }

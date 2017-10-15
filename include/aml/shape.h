@@ -4,6 +4,7 @@
 #include <limits>
 
 #include <aml/defs.h>
+#include <aml/types.h>
 
 namespace aml {
 
@@ -84,6 +85,7 @@ struct Shape {
 
   AML_HOST_DEVICE Shape<Dim - 1> tail() const {
     Shape<Dim - 1> s;
+    #pragma unroll
     for (int i = 0; i < Dim - 1; ++i) {
       s[i] = dims_[i];
     }
@@ -104,6 +106,7 @@ template <int Dim>
 AML_HOST_DEVICE Shape<Dim> strides(const Shape<Dim> &shape) {
   Shape<Dim> stride;
   Index product = 1;
+  #pragma unroll
   for (Index i = 0; i < Dim; ++i) {
     stride[i] = product;
     product *= shape[i];
@@ -117,10 +120,12 @@ inline AML_HOST_DEVICE Shape<0> strides(const Shape<0>&) {
 }
 
 template <int Dim>
-AML_HOST_DEVICE Index dot(const Shape<Dim> &s1, const Shape<Dim> &s2) {
-  Index product = 0;
-  for (Index i = 0; i < Dim; ++i) {
-    product += s1[i] * s2[i];
+AML_HOST_DEVICE Index dot(const Shape<Dim> &index, const Shape<Dim> &stride) {
+  AML_DEBUG_ASSERT(stride[0] == 1);
+  Index product = index[0];
+  #pragma unroll
+  for (Index i = 1; i < Dim; ++i) {
+    product += index[i] * stride[i];
   }
   return product;
 }
@@ -133,6 +138,7 @@ inline AML_HOST_DEVICE Index dot(const Shape<0>&, const Shape<0>&) {
 template <int Dim>
 AML_HOST_DEVICE Shape<Dim> diff(const Shape<Dim> &lhs, const Shape<Dim> &rhs) {
   Shape<Dim> shape;
+  #pragma unroll
   for (Index i = 0; i < Dim; ++i) {
     shape[i] = lhs[i] - rhs[i];
   }
@@ -147,6 +153,7 @@ inline AML_HOST_DEVICE Shape<0> diff(const Shape<0>&, const Shape<0>&) {
 template <int Dim>
 AML_HOST_DEVICE Shape<Dim> shape_index(const Shape<Dim> &shape, Index index) {
   Shape<Dim> index_shape;
+  #pragma unroll
   for (Index i = 0; i < Dim; ++i) {
     index_shape[i] = index % shape[i];
     index /= shape[i];

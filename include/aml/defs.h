@@ -9,6 +9,7 @@
 // Print and assert
 #define AML_STRINGIFY(x) #x
 #define AML_TOSTRING(x) AML_STRINGIFY(x)
+#define AML_GET_MACRO6(_1, _2, _3, _4, _5, _6, NAME, ...) NAME
 
 #define AML_ASSERT_EXCEPTION(exception, statement, message) \
   do { \
@@ -24,6 +25,26 @@
 
 #define AML_ASSERT(statement, message) \
   AML_ASSERT_EXCEPTION(std::runtime_error, (statement), (message))
+
+#define AML_INT_CHECK1(x0) \
+  (static_cast<decltype(x0)>(static_cast<int>(x0)) == x0)
+#define AML_INT_CHECK2(x0, x1) \
+  AML_INT_CHECK1(x0) && AML_INT_CHECK1(x1)
+#define AML_INT_CHECK3(x0, x1, x2) \
+  AML_INT_CHECK1(x0) && AML_INT_CHECK2(x1, x2)
+#define AML_INT_CHECK4(x0, x1, x2, x3) \
+  AML_INT_CHECK1(x0) && AML_INT_CHECK3(x1, x2, x3)
+#define AML_INT_CHECK5(x0, x1, x2, x3, x4) \
+  AML_INT_CHECK1(x0) && AML_INT_CHECK4(x1, x2, x3, x4)
+#define AML_INT_CHECK6(x0, x1, x2, x3, x4, x5) \
+  AML_INT_CHECK1(x0) && AML_INT_CHECK5(x1, x2, x3, x4, x5)
+#define AML_INT_CHECK(...) \
+  AML_GET_MACRO6(__VA_ARGS__, \
+      AML_INT_CHECK6, AML_INT_CHECK5, AML_INT_CHECK4, \
+      AML_INT_CHECK3, AML_INT_CHECK2, AML_INT_CHECK1)(__VA_ARGS__)
+
+#define AML_ASSERT_INT(...) \
+  AML_ASSERT(AML_INT_CHECK(__VA_ARGS__), "Integer overflow")
 
 // Debug
 #ifdef AML_DEBUG
@@ -65,13 +86,4 @@
 #define AML_HOST_DEVICE
 
 #endif  // endif AML_GPU
-
-// Types
-namespace aml {
-
-using Index = uint32_t;
-
-enum OP { TRANS, NO_TRANS };
-
-}  // namespace aml
 

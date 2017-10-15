@@ -11,4 +11,5 @@
 #include <aml/initializers.h>
 #include <aml/operations.h>
 #include <aml/shape.h>
+#include <aml/types.h>
 

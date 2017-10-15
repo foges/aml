@@ -28,7 +28,10 @@ public:
       : allocation_(allocation),
         data_(data),
         size_(size),
-        stride_(stride) { }
+        stride_(stride) {
+    AML_ASSERT(Dim == 0 || stride[0] == 1,
+        "Array must be contiguous in leading dimension");
+  }
 
   Array() : data_(nullptr), size_(), stride_(impl::strides(size_)) { }
 

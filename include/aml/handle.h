@@ -22,6 +22,12 @@ public:
 #endif
   }
 
+  void clear() {
+#ifdef AML_GPU
+    h_gpu->clear();
+#endif
+  }
+
 #ifdef AML_GPU
   impl::gpu::Handle* gpu() {
     return h_gpu;

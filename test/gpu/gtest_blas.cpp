@@ -65,7 +65,7 @@ protected:
 };
 
 TEST_F(BlasTestGpu, GpuGemmFloatNN) {
-  aml::gemm(h, aml::NO_TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 'n', 'n', 1.0f, Af, Bf, 0.0f, Cf);
   aml::copy(Cf, Cf_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf_h.data()[i], CNN_h[i]);
@@ -73,7 +73,7 @@ TEST_F(BlasTestGpu, GpuGemmFloatNN) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmFloatTN) {
-  aml::gemm(h, aml::TRANS, aml::NO_TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 't', 'n', 1.0f, Af, Bf, 0.0f, Cf);
   aml::copy(Cf, Cf_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf_h.data()[i], CTN_h[i]);
@@ -81,7 +81,7 @@ TEST_F(BlasTestGpu, GpuGemmFloatTN) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmFloatNT) {
-  aml::gemm(h, aml::NO_TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 'n', 't', 1.0f, Af, Bf, 0.0f, Cf);
   aml::copy(Cf, Cf_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf_h.data()[i], CNT_h[i]);
@@ -89,7 +89,7 @@ TEST_F(BlasTestGpu, GpuGemmFloatNT) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmFloatTT) {
-  aml::gemm(h, aml::TRANS, aml::TRANS, 1.0f, Af, Bf, 0.0f, Cf);
+  aml::gemm(h, 't', 't', 1.0f, Af, Bf, 0.0f, Cf);
   aml::copy(Cf, Cf_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cf_h.data()[i], CTT_h[i]);
@@ -97,7 +97,7 @@ TEST_F(BlasTestGpu, GpuGemmFloatTT) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmDoubleNN) {
-  aml::gemm(h, aml::NO_TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 'n', 'n', 1.0, Ad, Bd, 0.0, Cd);
   aml::copy(Cd, Cd_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd_h.data()[i], CNN_h[i]);
@@ -105,7 +105,7 @@ TEST_F(BlasTestGpu, GpuGemmDoubleNN) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmDoubleTN) {
-  aml::gemm(h, aml::TRANS, aml::NO_TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 't', 'n', 1.0, Ad, Bd, 0.0, Cd);
   aml::copy(Cd, Cd_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd_h.data()[i], CTN_h[i]);
@@ -113,7 +113,7 @@ TEST_F(BlasTestGpu, GpuGemmDoubleTN) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmDoubleNT) {
-  aml::gemm(h, aml::NO_TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 'n', 't', 1.0, Ad, Bd, 0.0, Cd);
   aml::copy(Cd, Cd_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd_h.data()[i], CNT_h[i]);
@@ -121,7 +121,7 @@ TEST_F(BlasTestGpu, GpuGemmDoubleNT) {
 }
 
 TEST_F(BlasTestGpu, GpuGemmDoubleTT) {
-  aml::gemm(h, aml::TRANS, aml::TRANS, 1.0, Ad, Bd, 0.0, Cd);
+  aml::gemm(h, 't', 't', 1.0, Ad, Bd, 0.0, Cd);
   aml::copy(Cd, Cd_h);
   for (size_t i = 0; i < size; ++i) {
     EXPECT_EQ(Cd_h.data()[i], CTT_h[i]);
