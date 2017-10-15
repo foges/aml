@@ -130,3 +130,44 @@ TEST(OperationsTest, ReducePartial2Max) {
   EXPECT_EQ(out.data()[1], -3);
 }
 
+TEST(OperationsTest, ReducePartialSliceSumLarge) {
+  size_t M = 50;
+  size_t N = 2 * M;
+  std::vector<int> data(N * M);
+  std::vector<int> res0(M, 0);
+  std::vector<int> res1(N, 0);
+  std::vector<int> res0s(M / 2, 0);
+  std::vector<int> res1s(N / 2, 0);
+  for (size_t j = 0; j < N; ++j) {
+    for (size_t i = 0; i < M; ++i) {
+      data[i + j * M] = (i % 2 == 0 ? 1 : -1) * (j + 1);
+    }
+  }
+  auto in = aml::make_array(data, aml::make_shape(1, M, 1, N));
+  auto out0 = aml::make_array(res0, aml::make_shape(M));
+  auto out1 = aml::make_array(res1, aml::make_shape(N));
+
+  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
+      aml::make_shape(1, M / 2, 1, N / 2));
+  auto out0s = aml::make_array(res0s, aml::make_shape(M / 2));
+  auto out1s = aml::make_array(res1s, aml::make_shape(N / 2));
+
+  aml::reduce(in, out0, {{0, 3, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(in, out1, {{0, 1, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(ins, out0s, {{0, 3, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(ins, out1s, {{0, 1, 2}}, aml::Abs(), aml::Plus());
+
+  for (size_t i = 0; i < M; ++i) {
+    ASSERT_EQ(out0.data()[i], N * (N + 1) / 2);
+  }
+  for (size_t j = 0; j < N; ++j) {
+    ASSERT_EQ(out1.data()[j], (j + 1) * M);
+  }
+  for (size_t i = 0; i < M / 2; ++i) {
+    ASSERT_EQ(out0s.data()[i], N  / 2 * (N / 2 + 1) / 2);
+  }
+  for (size_t j = 0; j < N / 2; ++j) {
+    ASSERT_EQ(out1s.data()[j], (j + 1) * M / 2);
+  }
+}
+

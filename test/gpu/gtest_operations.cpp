@@ -202,3 +202,59 @@ TEST(OperationsTest, GpuReducePartial2Max) {
   EXPECT_EQ(out_h.data()[1], -3);
 }
 
+TEST(OperationsTest, GpuReducePartialSliceSumLarge) {
+  size_t M = 50;
+  size_t N = 2 * M;
+  std::vector<int> data(N * M);
+  std::vector<int> res0(M, 0);
+  std::vector<int> res1(N, 0);
+  std::vector<int> res0s(M / 2, 0);
+  std::vector<int> res1s(N / 2, 0);
+  for (size_t j = 0; j < N; ++j) {
+    for (size_t i = 0; i < M; ++i) {
+      data[i + j * M] = (i % 2 == 0 ? 1 : -1) * (j + 1);
+    }
+  }
+  auto in_h = aml::make_array(data, aml::make_shape(1, M, 1, N));
+  auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
+  auto out0_h = aml::make_array(res0, aml::make_shape(M));
+  auto out0 = aml::Array<int, 1>(aml::GPU, out0_h.size());
+  auto out1_h = aml::make_array(res1, aml::make_shape(N));
+  auto out1 = aml::Array<int, 1>(aml::GPU, out1_h.size());
+
+  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
+      aml::make_shape(1, M / 2, 1, N / 2));
+  auto out0s_h = aml::make_array(res0s, aml::make_shape(M / 2));
+  auto out0s = aml::Array<int, 1>(aml::GPU, out0s_h.size());
+  auto out1s_h = aml::make_array(res1s, aml::make_shape(N / 2));
+  auto out1s = aml::Array<int, 1>(aml::GPU, out1s_h.size());
+
+  aml::copy(in_h, in);
+  aml::copy(out0_h, out0);
+  aml::copy(out1_h, out1);
+  aml::copy(out0s_h, out0s);
+  aml::copy(out1s_h, out1s);
+
+  aml::reduce(in, out0, {{0, 3, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(in, out1, {{0, 1, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(ins, out0s, {{0, 3, 2}}, aml::Abs(), aml::Plus());
+  aml::reduce(ins, out1s, {{0, 1, 2}}, aml::Abs(), aml::Plus());
+  aml::copy(out0, out0_h);
+  aml::copy(out1, out1_h);
+  aml::copy(out0s, out0s_h);
+  aml::copy(out1s, out1s_h);
+
+  for (size_t i = 0; i < M; ++i) {
+    ASSERT_EQ(out0_h.data()[i], N * (N + 1) / 2);
+  }
+  for (size_t j = 0; j < N; ++j) {
+    ASSERT_EQ(out1_h.data()[j], (j + 1) * M);
+  }
+  for (size_t i = 0; i < M / 2; ++i) {
+    ASSERT_EQ(out0s_h.data()[i], N  / 2 * (N / 2 + 1) / 2);
+  }
+  for (size_t j = 0; j < N / 2; ++j) {
+    ASSERT_EQ(out1s_h.data()[j], (j + 1) * M / 2);
+  }
+}
+

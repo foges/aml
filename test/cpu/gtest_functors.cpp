@@ -50,6 +50,11 @@ TEST(FunctorTest, Min) {
   EXPECT_EQ(aml::Min()(0.25, -0.5), -0.5);
 }
 
+TEST(FunctorTest, Plus) {
+  EXPECT_EQ(aml::Plus()(2.0f, -2.0f), 0.0f);
+  EXPECT_EQ(aml::Plus()(2.0, 1.5), 3.5);
+}
+
 TEST(FunctorTest, Sqrt) {
   EXPECT_EQ(aml::Sqrt()(2.0f), std::sqrt(2.0f));
   EXPECT_EQ(aml::Sqrt()(2.0), std::sqrt(2.0));

@@ -68,6 +68,14 @@ public:
   }
 };
 
+class Plus {
+public:
+  template <typename T>
+  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+    return x + y;
+  }
+};
+
 class Sqrt {
 public:
   AML_HOST_DEVICE float operator()(const float &x) const {
