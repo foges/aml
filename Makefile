@@ -21,14 +21,16 @@ ifeq ($(UNAME_S), Darwin)
 endif
 
 # Compilation
-FLAGS=-std=c++11 -Wall -Wextra ${EXTRA_FLAGS}
+FLAGS=-std=c++11 -Wall -Wextra -Wno-unknown-pragmas ${EXTRA_FLAGS}
 DEPS=-Iinclude -isystem ${GTEST_DIR}/include
 
 NVCC=nvcc -ccbin=${CC}
-NVFLAGS=-std=c++11 -arch ${CUDA_ARCH} --compiler-options -Wall,-Wextra \
+NVFLAGS=-std=c++11 -arch ${CUDA_ARCH} \
+    --compiler-options -Wall,-Wextra,-Wno-unknown-pragmas \
     ${EXTRA_FLAGS} -DAML_GPU -x cu
 NVDEPS=-isystem ${CUDA_DIR}/include
-CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas -lcusolver
+CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas -lcusolver \
+    -fopenmp
 
 TESTS=$(wildcard test/cpu/gtest_*.cpp)
 NVTESTS=$(wildcard test/gpu/gtest_*.cpp)

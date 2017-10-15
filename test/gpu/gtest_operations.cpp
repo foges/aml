@@ -203,7 +203,7 @@ TEST(OperationsTest, GpuReducePartial2Max) {
 }
 
 TEST(OperationsTest, GpuReducePartialSliceSumLarge) {
-  size_t M = 50;
+  size_t M = 52;
   size_t N = 2 * M;
   std::vector<int> data(N * M);
   std::vector<int> res0(M, 0);
@@ -251,7 +251,7 @@ TEST(OperationsTest, GpuReducePartialSliceSumLarge) {
     ASSERT_EQ(out1_h.data()[j], (j + 1) * M);
   }
   for (size_t i = 0; i < M / 2; ++i) {
-    ASSERT_EQ(out0s_h.data()[i], N  / 2 * (N / 2 + 1) / 2);
+    ASSERT_EQ(out0s_h.data()[i], N / 2 * (N / 2 + 1) / 2);
   }
   for (size_t j = 0; j < N / 2; ++j) {
     ASSERT_EQ(out1s_h.data()[j], (j + 1) * M / 2);
