@@ -186,9 +186,20 @@ void reduce(const ImmutableArray<Tin, DimIn> &in,
   for (int i = 0; i < DimIn - DimOut; ++i) {
     size_r_shape[i] = in.size()[axis[i]];
   }
-  int grid_dim = std::min<int>(out.size().numel(), 32 * 28);
-  int block_dim = std::min(256, std::min<int>(49152 / sizeof(Tout), 32 * (out.size().numel() / grid_dim)));
-  block_dim = (block_dim + 32 - 1) / 32 * 32;
+
+  Index numel = out.size().numel();
+
+  int num_proc = 28;
+  int sm_per_proc = 49152;
+  int sm_per_warp = 32 * sizeof(Tout);
+  int max_warps_per_proc = sm_per_proc / sm_per_warp;
+  AML_ASSERT(max_warps_per_proc >= 1, "Must have at least one warp per proc");
+  int max_blocks = num_proc * std::min(32, max_warps_per_proc);;
+  int grid_dim = static_cast<int>(std::min<Index>(numel, max_blocks));
+
+  Index numel_per_block = (numel + grid_dim - 1) / grid_dim;
+  int max_threads_per_proc = 32 * std::min(8, max_warps_per_proc);
+  int block_dim = std::min<int>(max_threads_per_proc, 32 * numel_per_block);
 
   reduce<<<grid_dim, block_dim, block_dim * sizeof(Tout)>>>(
       in.data(), out.data(), in.size(), out.size(), in.stride(), out.stride(),

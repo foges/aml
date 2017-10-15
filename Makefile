@@ -10,7 +10,7 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S), Linux)
   CC=g++
   CUDA_LIB_DIR=${CUDA_DIR}/lib64
-  LDFLAGS=-lblas -pthread
+  LDFLAGS=-lblas -pthread -fopenmp
   GTEST_DIR=/home/fougner/libs/googletest/googletest
 endif
 ifeq ($(UNAME_S), Darwin)
@@ -29,8 +29,7 @@ NVFLAGS=-std=c++11 -arch ${CUDA_ARCH} \
     --compiler-options -Wall,-Wextra,-Wno-unknown-pragmas \
     ${EXTRA_FLAGS} -DAML_GPU -x cu
 NVDEPS=-isystem ${CUDA_DIR}/include
-CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas -lcusolver \
-    -fopenmp
+CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas -lcusolver
 
 TESTS=$(wildcard test/cpu/gtest_*.cpp)
 NVTESTS=$(wildcard test/gpu/gtest_*.cpp)
