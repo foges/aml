@@ -1,122 +1,114 @@
 #pragma once
 
+#include <algorithm>
 #include <chrono>
+#include <map>
+#include <memory>
+#include <sstream>
+#include <vector>
 
 #include <aml/defs.h>
 
 namespace aml {
 namespace impl {
 
-enum Profile {
-  // CPU
-  PROF_CPU_BLAS_NRM2,
-  PROF_CPU_BLAS_GEMV,
-  PROF_CPU_BLAS_TRSV,
-  PROF_CPU_BLAS_GEMM,
-  PROF_CPU_BLAS_SYRK,
-  PROF_CPU_BLAS_TRSM,
-
-  PROF_CPU_LINALG_POTRF,
-
-  PROF_CPU_OP_SET,
-  PROF_CPU_OP_UNARY,
-  PROF_CPU_OP_BINARY,
-  PROF_CPU_OP_REDUCE,
-  PROF_CPU_OP_COPY,
-
-  // GPU
-  PROF_GPU_BLAS_NRM2,
-  PROF_GPU_BLAS_GEMV,
-  PROF_GPU_BLAS_TRSV,
-  PROF_GPU_BLAS_GEMM,
-  PROF_GPU_BLAS_SYRK,
-  PROF_GPU_BLAS_TRSM,
-
-  PROF_GPU_LINALG_POTRF,
-
-  PROF_GPU_OP_SET,
-  PROF_GPU_OP_UNARY,
-  PROF_GPU_OP_BINARY,
-  PROF_GPU_OP_REDUCE,
-  PROF_GPU_OP_COPY_G2C,
-  PROF_GPU_OP_COPY_G2G,
-  PROF_GPU_OP_COPY_C2G,
-
-  // DON'T TOUCH
-  PROF_SIZE
-};
-
-inline std::string name(Profile prof) {
-  static const char *names[] = {
-      // CPU
-      "CPU_BLAS_NRM2",
-      "CPU_BLAS_GEMV",
-      "CPU_BLAS_TRSV",
-      "CPU_BLAS_GEMM",
-      "CPU_BLAS_SYRK",
-      "CPU_BLAS_TRSM",
-
-      "CPU_LINALG_POTRF",
-
-      "CPU_OP_SET",
-      "CPU_OP_UNARY",
-      "CPU_OP_BINARY",
-      "CPU_OP_REDUCE",
-      "CPU_OP_COPY",
-
-      // GPU
-      "GPU_BLAS_NRM2",
-      "GPU_BLAS_GEMV",
-      "GPU_BLAS_TRSV",
-      "GPU_BLAS_GEMM",
-      "GPU_BLAS_SYRK",
-      "GPU_BLAS_TRSM",
-
-      "GPU_LINALG_POTRF",
-
-      "GPU_OP_SET",
-      "GPU_OP_UNARY",
-      "GPU_OP_BINARY",
-      "GPU_OP_REDUCE",
-      "GPU_OP_COPY_G2C",
-      "GPU_OP_COPY_G2G",
-      "GPU_OP_COPY_C2G",
-  };
-
-  static_assert(sizeof(names) / sizeof(names[0]) == PROF_SIZE,
-      "Profiler names mismatch");
-  AML_ASSERT(prof < PROF_SIZE, "Profile out of bounds");
-  return names[prof];
-}
-
 using time_point = std::chrono::time_point<std::chrono::high_resolution_clock>;
 
-class Profiler {
+struct Profile {
+  Profile() : duration_us(0), num_calls(0) { }
+
+  uint64_t duration_us;
+  uint32_t num_calls;
+};
+
+class Toc {
 public:
-  Profiler() : duration_us_(), start_times_() { }
+  Toc() : enabled_(false) { }
 
-  void tic(Profile prof) {
-    AML_DEBUG_ASSERT(prof < PROF_SIZE);
-    start_times_[prof] = std::chrono::high_resolution_clock::now();
+  Toc(const time_point &start, Profile* profile)
+      : enabled_(true), start_(start), profile_(profile), did_stop_(false) { }
+
+  ~Toc() {
+    AML_ASSERT(!enabled_ || did_stop_, "Must stop profiler");
   }
 
-  void toc(Profile prof) {
-    AML_DEBUG_ASSERT(prof < PROF_SIZE);
-    auto elapsed =
-        std::chrono::high_resolution_clock::now() - start_times_[prof];
-    duration_us_[prof] +=
+  void stop() {
+    if (!enabled_) {
+      return;
+    }
+
+    AML_ASSERT(!did_stop_, "Multiple invocations of stop for same profile");
+    did_stop_ = true;
+    auto elapsed = std::chrono::high_resolution_clock::now() - start_;
+    profile_->duration_us +=
         std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
-  }
-
-  std::string to_string() const {
-    // TODO
-    return "";
+    profile_->num_calls += 1;
   }
 
 private:
-  //bool has_started_[PROF_SIZE]; // Debug
-  uint64_t duration_us_[PROF_SIZE];
-  time_point start_times_[PROF_SIZE];
+  bool enabled_;
+  time_point start_;
+  Profile *profile_;
+  bool did_stop_;
+};
+
+class Profiler {
+public:
+  Profiler(bool enabled) : enabled_(enabled) { }
+
+  Toc tic(const std::string &name) {
+    if (!enabled_) {
+      return Toc();
+    }
+
+    auto it = profiles_.find(name);
+    if (it == profiles_.end()) {
+      it = profiles_.insert(
+          std::make_pair(name, std::unique_ptr<Profile>(new Profile()))).first;
+    }
+    return Toc(std::chrono::high_resolution_clock::now(), it->second.get());
+  }
+
+  std::string to_string() const {
+    using element = std::tuple<uint64_t, uint32_t, std::string>;
+    std::vector<element> elements;
+    elements.reserve(profiles_.size());
+
+    for (auto &val : profiles_) {
+      elements.push_back(std::make_tuple(
+          val.second->duration_us, val.second->num_calls, val.first));
+    }
+
+    std::sort(elements.begin(), elements.end(),
+        [](const element &x, element &y){ return x > y; });
+
+    std::stringstream ss;
+    ss << "-------------------------------------------------------------------"
+       << std::endl;
+    ss << "| "
+       << std::setw(19) << "Name"      << " | "
+       << std::setw(19) << "Time (ms)" << " | "
+       << std::setw(19) << "Num calls" << " |"
+       << std::endl;
+    ss << "|-----------------------------------------------------------------|"
+       << std::endl;
+
+    for (auto &val : elements) {
+      ss << "| "
+         << std::setw(19) << std::get<2>(val) << " | "
+         << std::setw(19) << std::get<0>(val) / 1000 << " | "
+         << std::setw(19) << std::get<1>(val) << " |"
+         << std::endl;
+    }
+    ss << "-------------------------------------------------------------------"
+       << std::endl;
+
+    return ss.str();
+  }
+
+private:
+  bool enabled_;
+  std::map<std::string, std::unique_ptr<Profile>> profiles_;
 };
 
 }  // namespace impl

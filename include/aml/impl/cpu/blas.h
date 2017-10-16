@@ -19,23 +19,29 @@ inline CBLAS_TRANSPOSE convert_op(char op) {
 
 /** BLAS LEVEL 1 **************************************************************/
 
-inline float nrm2(aml::Handle,
+inline float nrm2(aml::Handle h,
                   Index n,
                   const float *x) {
   AML_ASSERT_INT(n);
-  return cblas_snrm2(n, x, 1);
+  auto tic = h.tic("nrm2s_" + std::to_string(n));
+  float res = cblas_snrm2(n, x, 1);
+  tic.stop();
+  return res;
 }
 
-inline double nrm2(aml::Handle,
+inline double nrm2(aml::Handle h,
                    Index n,
                    const double *x) {
   AML_ASSERT_INT(n);
-  return cblas_dnrm2(n, x, 1);
+  auto tic = h.tic("nrm2d_" + std::to_string(n));
+  double res = cblas_dnrm2(n, x, 1);
+  tic.stop();
+  return res;
 }
 
 /** BLAS LEVEL 2 **************************************************************/
 
-inline void gemv(aml::Handle,
+inline void gemv(aml::Handle h,
                  char op,
                  Index m,
                  Index n,
@@ -46,11 +52,13 @@ inline void gemv(aml::Handle,
                  float beta,
                  float *y) {
   AML_ASSERT_INT(m, n, lda);
+  auto tic = h.tic("gemvs_" + std::to_string(m) + "_" + std::to_string(n));
   cblas_sgemv(CblasColMajor,
       convert_op(op), m, n, alpha, a, lda, x, 1, beta, y, 1);
+  tic.stop();
 }
 
-inline void gemv(aml::Handle,
+inline void gemv(aml::Handle h,
                  char op,
                  Index m,
                  Index n,
@@ -61,35 +69,42 @@ inline void gemv(aml::Handle,
                  double beta,
                  double *y) {
   AML_ASSERT_INT(m, n, lda);
+  auto tic = h.tic("gemvs_" + std::to_string(m) + "_" + std::to_string(n));
   cblas_dgemv(CblasColMajor,
       convert_op(op), m, n, alpha, a, lda, x, 1, beta, y, 1);
+  tic.stop();
 }
 
-inline void trsv(aml::Handle,
+inline void trsv(aml::Handle h,
                  char op,
                  Index m,
                  const float *a,
                  Index lda,
                  float *x) {
   AML_ASSERT_INT(m, lda);
+  auto tic = h.tic("trsvs_" + std::to_string(m));
   cblas_strsv(CblasColMajor, CblasLower,
       convert_op(op), CblasNonUnit, m, a, lda, x, 1);
+  tic.stop();
 }
 
-inline void trsv(aml::Handle,
+inline void trsv(aml::Handle h,
                  char op,
                  Index m,
                  const double *a,
                  Index lda,
                  double *x) {
   AML_ASSERT_INT(m, lda);
+  auto tic = h.tic("trsvd_" + std::to_string(m));
+
   cblas_dtrsv(CblasColMajor, CblasLower,
       convert_op(op), CblasNonUnit, m, a, lda, x, 1);
+  tic.stop();
 }
 
 /** BLAS LEVEL 3 **************************************************************/
 
-inline void gemm(aml::Handle,
+inline void gemm(aml::Handle h,
                  char op_a,
                  char op_b,
                  Index m,
@@ -104,11 +119,15 @@ inline void gemm(aml::Handle,
                  float *c,
                  Index ldc) {
   AML_ASSERT_INT(m, n, k, lda, ldb, ldc);
+  auto tic = h.tic("gemms_"
+      + std::to_string(m) + "_" + std::to_string(n) + "_" + std::to_string(k));
+
   cblas_sgemm(CblasColMajor, convert_op(op_a), convert_op(op_b),
       m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+  tic.stop();
 }
 
-inline void gemm(aml::Handle,
+inline void gemm(aml::Handle h,
                  char op_a,
                  char op_b,
                  Index m,
@@ -123,11 +142,15 @@ inline void gemm(aml::Handle,
                  double *c,
                  Index ldc) {
   AML_ASSERT_INT(m, n, k, lda, ldb, ldc);
+  auto tic = h.tic("gemmd_"
+      + std::to_string(m) + "_" + std::to_string(n) + "_" + std::to_string(k));
+
   cblas_dgemm(CblasColMajor, convert_op(op_a), convert_op(op_b),
       m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+  tic.stop();
 }
 
-inline void syrk(aml::Handle,
+inline void syrk(aml::Handle h,
                  char op,
                  Index n,
                  Index k,
@@ -138,11 +161,14 @@ inline void syrk(aml::Handle,
                  float *c,
                  Index ldc) {
   AML_ASSERT_INT(n, k, lda, ldc);
+  auto tic = h.tic("syrkd_" + std::to_string(n) + "_" + std::to_string(k));
+
   cblas_ssyrk(CblasColMajor, CblasLower,
       convert_op(op), n, k, alpha, a, lda, beta, c, ldc);
+  tic.stop();
 }
 
-inline void syrk(aml::Handle,
+inline void syrk(aml::Handle h,
                  char op,
                  Index n,
                  Index k,
@@ -153,11 +179,14 @@ inline void syrk(aml::Handle,
                  double *c,
                  Index ldc) {
   AML_ASSERT_INT(n, k, lda, ldc);
+  auto tic = h.tic("syrkd_" + std::to_string(n) + "_" + std::to_string(k));
+
   cblas_dsyrk(CblasColMajor, CblasLower,
       convert_op(op), n, k, alpha, a, lda, beta, c, ldc);
+  tic.stop();
 }
 
-inline void trsm(aml::Handle,
+inline void trsm(aml::Handle h,
                  char op,
                  Index m,
                  Index n,
@@ -167,12 +196,15 @@ inline void trsm(aml::Handle,
                  float *b,
                  Index ldb) {
   AML_ASSERT_INT(m, n, lda, ldb);
+  auto tic = h.tic("trsms_" + std::to_string(m) + "_" + std::to_string(n));
+
   cblas_strsm(
       CblasColMajor, CblasRight, CblasLower, convert_op(op), CblasNonUnit,
       m, n, alpha, a, lda, b, ldb);
+  tic.stop();
 }
 
-inline void trsm(aml::Handle,
+inline void trsm(aml::Handle h,
                  char op,
                  Index m,
                  Index n,
@@ -182,9 +214,12 @@ inline void trsm(aml::Handle,
                  double *b,
                  Index ldb) {
   AML_ASSERT_INT(m, n, lda, ldb);
+  auto tic = h.tic("trsmd_" + std::to_string(m) + "_" + std::to_string(n));
+
   cblas_dtrsm(
       CblasColMajor, CblasRight, CblasLower, convert_op(op), CblasNonUnit,
       m, n, alpha, a, lda, b, ldb);
+  tic.stop();
 }
 
 }  // namespace cpu

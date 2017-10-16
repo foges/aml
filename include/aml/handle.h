@@ -13,9 +13,7 @@ public:
   Handle() : profiler_(nullptr) { }
 
   void init(bool enable_profiling=false) {
-    if (enable_profiling) {
-      profiler_ = new impl::Profiler();
-    }
+    profiler_ = new impl::Profiler(enable_profiling);
 #ifdef AML_GPU
     h_gpu_ = new impl::gpu::Handle();
 #endif
@@ -33,16 +31,12 @@ public:
 #endif
   }
 
-  void tic(impl::Profile prof) {
-    if (profiler_ != nullptr) {
-      profiler_->tic(prof);
-    }
+  impl::Toc tic(const std::string &name) {
+    return profiler_->tic(name);
   }
 
-  void toc(impl::Profile prof) {
-    if (profiler_ != nullptr) {
-      profiler_->toc(prof);
-    }
+  void print_profile() const {
+    std::cout << profiler_->to_string();
   }
 
 #ifdef AML_GPU

@@ -32,8 +32,10 @@ void set(T *out,
 }
 
 template <typename T, int Dim>
-void set(aml::Handle, Array<T, Dim> &out, const T &val) {
+void set(aml::Handle h, Array<T, Dim> &out, const T &val) {
+  auto tic = h.tic("set_" + std::to_string(out.size().numel()));
   set(out.data(), out.stride(), out.size(), val);
+  tic.stop();
 }
 
 /** UNARY_OP ******************************************************************/
@@ -63,11 +65,13 @@ void unary_op(const Tin *in,
 }
 
 template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(aml::Handle,
+void unary_op(aml::Handle h,
               const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
+  auto tic = h.tic("unary_op_" + std::to_string(in.size().numel()));
   unary_op(in.data(), in.stride(), out.data(), out.stride(), in.size(), op);
+  tic.stop();
 }
 
 /** BINARY_OP *****************************************************************/
@@ -102,13 +106,15 @@ void binary_op(const Tin1 *in1,
 }
 
 template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(aml::Handle,
+void binary_op(aml::Handle h,
                const ImmutableArray<Tin1, Dim> &in1,
                const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
+  auto tic = h.tic("binary_op_" + std::to_string(in1.size().numel()));
   binary_op(in1.data(), in1.stride(), in2.data(), in2.stride(),
       out.data(), out.stride(), in1.size(), op);
+  tic.stop();
 }
 
 /** REDUCE ********************************************************************/
@@ -156,13 +162,14 @@ template <typename Tin,
           int DimOut,
           typename TransformOp,
           typename ReduceOp>
-void reduce(aml::Handle,
+void reduce(aml::Handle h,
             const ImmutableArray<Tin, DimIn> &in,
             Array<Tout, DimOut> &out,
             const std::array<int, DimIn - DimOut>&,
             const std::array<int, DimOut> &axis_nr,
             const TransformOp &op_t,
             const ReduceOp &op_r) {
+  auto tic = h.tic("reduce_" + std::to_string(in.size().numel()));
 
   Shape<DimIn> stride_out;
   for (int i = 0; i < DimOut; ++i) {
@@ -171,24 +178,30 @@ void reduce(aml::Handle,
 
   reduce(
       in.data(), in.stride(), in.size(), out.data(), stride_out, op_t, op_r);
+
+  tic.stop();
 }
 
 /** COPY **********************************************************************/
 
 template <typename T, int Dim>
 void copy(aml::Handle h, const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
+  auto tic = h.tic("copy_cpu_cpu_" + std::to_string(in.size().numel()));
   if (in.is_contiguous() && out.is_contiguous()) {
     std::memcpy(out.data(), in.data(), in.size().numel() * sizeof(T));
   } else {
     cpu::unary_op(h, in, out, [](const T &x){ return x; });
   }
+  tic.stop();
 }
 
 template <typename Tin, typename Tout, int Dim>
 void copy(aml::Handle h,
           const ImmutableArray<Tin, Dim> &in,
           Array<Tout, Dim> &out) {
+  auto tic = h.tic("copy_cpu_cpu_" + std::to_string(in.size().numel()));
   cpu::unary_op(h, in, out, [](const Tin &x){ return static_cast<Tout>(x); });
+  tic.stop();
 }
 
 }  // namespace cpu
