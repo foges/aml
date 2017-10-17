@@ -25,8 +25,12 @@ __global__ void set(T *out, Shape<Dim> size, Shape<Dim> stride, T val) {
 
 template <typename T, int Dim>
 void set(aml::Handle h, Array<T, Dim> &out, const T &val) {
+  auto tic = h.tic("gpu_set_" + std::to_string(out.size().numel()));
+
   auto dims = launch_dims(h.gpu(), out.size().numel());
   set<<<dims.first, dims.second>>>(out.data(), out.size(), out.stride(), val);
+
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 /** UNARY_OP ******************************************************************/
@@ -53,9 +57,13 @@ void unary_op(aml::Handle h,
               const ImmutableArray<Tin, Dim> &in,
               Array<Tout, Dim> &out,
               const Op &op) {
+  auto tic = h.tic("gpu_unary_op_" + std::to_string(in.size().numel()));
+
   auto dims = launch_dims(h.gpu(), in.size().numel());
   unary_op<<<dims.first, dims.second>>>(
       in.data(), out.data(), in.size(), in.stride(), out.stride(), op);
+
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 /** BINARY_OP *****************************************************************/
@@ -86,10 +94,14 @@ void binary_op(aml::Handle h,
                const ImmutableArray<Tin2, Dim> &in2,
                Array<Tout, Dim> &out,
                const Op &op) {
+  auto tic = h.tic("gpu_binary_op_" + std::to_string(in1.size().numel()));
+
   auto dims = launch_dims(h.gpu(), in1.size().numel());
   binary_op<<<dims.first, dims.second>>>(
       in1.data(), in2.data(), out.data(), in1.size(),
       in1.stride(), in2.stride(), out.stride(), op);
+
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 /** REDUCE ********************************************************************/
@@ -176,6 +188,7 @@ void reduce(aml::Handle h,
             const std::array<int, DimOut> &axis_nr,
             const TransformOp &op_t,
             const ReduceOp &op_r) {
+  auto tic = h.tic("gpu_reduce_" + std::to_string(in.size().numel()));
 
   Shape<DimOut> axis_nr_shape;
   for (int i = 0; i < DimOut; ++i) {
@@ -207,6 +220,8 @@ void reduce(aml::Handle h,
   reduce<<<grid_dim, block_dim, block_dim * sizeof(Tout)>>>(
       in.data(), out.data(), in.size(), out.size(), in.stride(), out.stride(),
       axis_shape, axis_nr_shape, size_r_shape, op_t, op_r);
+
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 /** COPY **********************************************************************/
@@ -218,21 +233,29 @@ struct IdentityFunctor {
 
 template <typename T, int Dim>
 void copy(aml::Handle h, const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
+
   if (in.is_contiguous() && out.is_contiguous()) {
     size_t count = in.size().numel() * sizeof(T);
     if (in.device() == aml::CPU && out.device() == aml::GPU) {
+      auto tic = h.tic("cpu_gpu_copy_ " + std::to_string(in.size().numel()));
       AML_GPU_CHECK(cudaMemcpy(out.data(), in.data(), count,
           cudaMemcpyHostToDevice));
+      tic.stop([](){ cudaStreamSynchronize(nullptr); });
     } else if (in.device() == aml::GPU && out.device() == aml::CPU) {
+      auto tic = h.tic("gpu_cpu_copy_ " + std::to_string(in.size().numel()));
       AML_GPU_CHECK(cudaMemcpy(out.data(), in.data(), count,
           cudaMemcpyDeviceToHost));
+      tic.stop([](){ cudaStreamSynchronize(nullptr); });
     } else if (in.device() == aml::GPU && out.device() == aml::GPU) {
+      auto tic = h.tic("gpu_gpu_copy_ " + std::to_string(in.size().numel()));
       AML_GPU_CHECK(cudaMemcpy(out.data(), in.data(), count,
           cudaMemcpyDeviceToDevice));
+      tic.stop([](){ cudaStreamSynchronize(nullptr); });
     }
   } else {
     gpu::unary_op(h, in, out, IdentityFunctor<T, T>());
   }
+
 }
 
 template <typename Tin, typename Tout, int Dim>

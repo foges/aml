@@ -23,9 +23,14 @@ inline float nrm2(aml::Handle h,
                   Index n,
                   const float *x) {
   AML_ASSERT_INT(n);
+  auto tic = h.tic("gpu_snrm2_" + std::to_string(n));
+
   float result = 0;
   cublasStatus_t stat = cublasSnrm2(h.gpu()->cublas(), n, x, 1, &result);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS snrm2 failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
+
   return result;
 }
 
@@ -33,9 +38,14 @@ inline double nrm2(aml::Handle h,
                    Index n,
                    const double *x) {
   AML_ASSERT_INT(n);
+  auto tic = h.tic("gpu_dnrm2_" + std::to_string(n));
+
   double result = 0;
   cublasStatus_t stat = cublasDnrm2(h.gpu()->cublas(), n, x, 1, &result);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS dnrm2 failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
+
   return result;
 }
 
@@ -52,9 +62,13 @@ inline void gemv(aml::Handle h,
                  float beta,
                  float *y) {
   AML_ASSERT_INT(m, n, lda);
+  auto tic = h.tic("gpu_sgemv_" + std::to_string(m) + "_" + std::to_string(n));
+
   cublasStatus_t stat = cublasSgemv(h.gpu()->cublas(), convert_op(op),
       m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS sgemv failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void gemv(aml::Handle h,
@@ -68,9 +82,13 @@ inline void gemv(aml::Handle h,
                  double beta,
                  double *y) {
   AML_ASSERT_INT(m, n, lda);
+  auto tic = h.tic("gpu_dgemv_" + std::to_string(m) + "_" + std::to_string(n));
+
   cublasStatus_t stat = cublasDgemv(h.gpu()->cublas(), convert_op(op),
       m, n, &alpha, a, lda, x, 1, &beta, y, 1);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS dgemv failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void trsv(aml::Handle h,
@@ -80,9 +98,13 @@ inline void trsv(aml::Handle h,
                  Index lda,
                  float *x) {
   AML_ASSERT_INT(m, lda);
+  auto tic = h.tic("gpu_strsv_" + std::to_string(m));
+
   cublasStatus_t stat = cublasStrsv(h.gpu()->cublas(), CUBLAS_FILL_MODE_LOWER,
       convert_op(op), CUBLAS_DIAG_NON_UNIT, m, a, lda, x, 1);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS strsv failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void trsv(aml::Handle h,
@@ -92,9 +114,13 @@ inline void trsv(aml::Handle h,
                  Index lda,
                  double *x) {
   AML_ASSERT_INT(m, lda);
+  auto tic = h.tic("gpu_dtrsv_" + std::to_string(m));
+
   cublasStatus_t stat = cublasDtrsv(h.gpu()->cublas(), CUBLAS_FILL_MODE_LOWER,
       convert_op(op), CUBLAS_DIAG_NON_UNIT, m, a, lda, x, 1);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS dtrsv failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 /** BLAS LEVEL 3 **************************************************************/
@@ -114,9 +140,14 @@ inline void gemm(aml::Handle h,
                  float *c,
                  Index ldc) {
   AML_ASSERT_INT(m, n, k, lda, ldb, ldc);
+  auto tic = h.tic("gpu_sgemm_"
+      + std::to_string(m) + "_" + std::to_string(n) + "_" + std::to_string(k));
+
   cublasStatus_t stat = cublasSgemm(h.gpu()->cublas(), convert_op(op_a),
       convert_op(op_b), m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS sgemm failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void gemm(aml::Handle h,
@@ -134,9 +165,14 @@ inline void gemm(aml::Handle h,
                  double *c,
                  Index ldc) {
   AML_ASSERT_INT(m, n, k, lda, ldb, ldc);
+  auto tic = h.tic("gpu_dgemm_"
+      + std::to_string(m) + "_" + std::to_string(n) + "_" + std::to_string(k));
+
   cublasStatus_t stat = cublasDgemm(h.gpu()->cublas(), convert_op(op_a),
       convert_op(op_b), m, n, k, &alpha, a, lda, b, ldb, &beta, c, ldc);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS dgemm failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void syrk(aml::Handle h,
@@ -150,9 +186,13 @@ inline void syrk(aml::Handle h,
                  float *c,
                  Index ldc) {
   AML_ASSERT_INT(n, k, lda, ldc);
+  auto tic = h.tic("gpu_ssyrk_" + std::to_string(n) + "_" + std::to_string(k));
+
   cublasStatus_t stat = cublasSsyrk(h.gpu()->cublas(), CUBLAS_FILL_MODE_LOWER,
       convert_op(op), n, k, &alpha, a, lda, &beta, c, ldc);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS ssyrk failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void syrk(aml::Handle h,
@@ -166,9 +206,13 @@ inline void syrk(aml::Handle h,
                  double *c,
                  Index ldc) {
   AML_ASSERT_INT(n, k, lda, ldc);
+  auto tic = h.tic("gpu_dsyrk_" + std::to_string(n) + "_" + std::to_string(k));
+
   cublasStatus_t stat = cublasDsyrk(h.gpu()->cublas(), CUBLAS_FILL_MODE_LOWER,
       convert_op(op), n, k, &alpha, a, lda, &beta, c, ldc);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS dsyrk failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void trsm(aml::Handle h,
@@ -181,10 +225,14 @@ inline void trsm(aml::Handle h,
                  float *b,
                  Index ldb) {
   AML_ASSERT_INT(m, n, lda, ldb);
+  auto tic = h.tic("gpu_strsm_" + std::to_string(m) + "_" + std::to_string(n));
+
   cublasStatus_t stat = cublasStrsm(h.gpu()->cublas(),
       CUBLAS_SIDE_RIGHT, CUBLAS_FILL_MODE_LOWER, convert_op(op),
       CUBLAS_DIAG_NON_UNIT, m, n, &alpha, a, lda, b, ldb);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS sstrsm failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 inline void trsm(aml::Handle h,
@@ -197,10 +245,14 @@ inline void trsm(aml::Handle h,
                  double *b,
                  Index ldb) {
   AML_ASSERT_INT(m, n, lda, ldb);
+  auto tic = h.tic("gpu_dtrsm_" + std::to_string(m) + "_" + std::to_string(n));
+
   cublasStatus_t stat = cublasDtrsm(h.gpu()->cublas(),
       CUBLAS_SIDE_RIGHT, CUBLAS_FILL_MODE_LOWER, convert_op(op),
       CUBLAS_DIAG_NON_UNIT, m, n, &alpha, a, lda, b, ldb);
+
   AML_ASSERT(stat == CUBLAS_STATUS_SUCCESS, "CuBLAS dstrsm failed");
+  tic.stop([](){ cudaStreamSynchronize(nullptr); });
 }
 
 }  // namespace gpu

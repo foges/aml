@@ -32,6 +32,16 @@ public:
     AML_ASSERT(!enabled_ || did_stop_, "Must stop profiler");
   }
 
+  template <typename Function>
+  void stop(const Function &f) {
+    if (!enabled_) {
+      return;
+    }
+
+    f();
+    stop();
+  }
+
   void stop() {
     if (!enabled_) {
       return;

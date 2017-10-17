@@ -146,7 +146,7 @@ TEST_F(OperationsTest, ReducePartial2Max) {
 }
 
 TEST_F(OperationsTest, ReducePartialSliceSumLarge) {
-  size_t M = 50;
+  size_t M = 52;
   size_t N = 2 * M;
   std::vector<int> data(N * M);
   std::vector<int> res0(M, 0);
