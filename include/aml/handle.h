@@ -10,7 +10,11 @@ namespace aml {
 
 class Handle {
 public:
-  Handle() : profiler_(nullptr) { }
+  Handle() :
+#ifdef AML_GPU
+      h_gpu_(nullptr),
+#endif
+      profiler_(nullptr) { }
 
   void init(bool enable_profiling=false) {
     profiler_ = new impl::Profiler(enable_profiling);
@@ -31,8 +35,18 @@ public:
 #endif
   }
 
+  void synchronize() const {
+#ifdef AML_GPU
+    h_gpu_->synchronize();
+#endif
+  }
+
   impl::Toc tic(const std::string &name) {
     return profiler_->tic(name);
+  }
+
+  impl::Toc tic(const std::string &name, std::function<void()> sync) {
+    return profiler_->tic(name, sync);
   }
 
   void print_profile() const {
@@ -46,11 +60,11 @@ public:
 #endif
 
 private:
-  impl::Profiler *profiler_;
-
 #ifdef AML_GPU
   impl::gpu::Handle *h_gpu_;
 #endif
+
+  impl::Profiler *profiler_;
 };
 
 }  // namespace aml

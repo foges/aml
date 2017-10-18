@@ -34,7 +34,9 @@ void set(T *out,
 template <typename T, int Dim>
 void set(aml::Handle h, Array<T, Dim> &out, const T &val) {
   auto tic = h.tic("cpu_set_" + std::to_string(out.size().numel()));
+
   set(out.data(), out.stride(), out.size(), val);
+
   tic.stop();
 }
 
@@ -70,7 +72,9 @@ void unary_op(aml::Handle h,
               Array<Tout, Dim> &out,
               const Op &op) {
   auto tic = h.tic("cpu_unary_op_" + std::to_string(in.size().numel()));
+
   unary_op(in.data(), in.stride(), out.data(), out.stride(), in.size(), op);
+
   tic.stop();
 }
 
@@ -112,8 +116,10 @@ void binary_op(aml::Handle h,
                Array<Tout, Dim> &out,
                const Op &op) {
   auto tic = h.tic("cpu_binary_op_" + std::to_string(in1.size().numel()));
+
   binary_op(in1.data(), in1.stride(), in2.data(), in2.stride(),
       out.data(), out.stride(), in1.size(), op);
+
   tic.stop();
 }
 

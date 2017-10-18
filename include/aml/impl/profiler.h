@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <functional>
 #include <map>
 #include <memory>
 #include <sstream>
@@ -25,21 +26,19 @@ class Toc {
 public:
   Toc() : enabled_(false) { }
 
-  Toc(const time_point &start, Profile* profile)
-      : enabled_(true), start_(start), profile_(profile), did_stop_(false) { }
+  Toc(const time_point &start,
+      Profile* profile,
+      std::function<void()> sync)
+      : enabled_(true),
+        did_stop_(false),
+        start_(start),
+        profile_(profile),
+        sync_(sync) {
+      sync_();
+  }
 
   ~Toc() {
     AML_ASSERT(!enabled_ || did_stop_, "Must stop profiler");
-  }
-
-  template <typename Function>
-  void stop(const Function &f) {
-    if (!enabled_) {
-      return;
-    }
-
-    f();
-    stop();
   }
 
   void stop() {
@@ -49,6 +48,7 @@ public:
 
     AML_ASSERT(!did_stop_, "Multiple invocations of stop for same profile");
     did_stop_ = true;
+    sync_();
     auto elapsed = std::chrono::high_resolution_clock::now() - start_;
     profile_->duration_us +=
         std::chrono::duration_cast<std::chrono::microseconds>(elapsed).count();
@@ -57,9 +57,10 @@ public:
 
 private:
   bool enabled_;
+  bool did_stop_;
   time_point start_;
   Profile *profile_;
-  bool did_stop_;
+  std::function<void()> sync_;
 };
 
 class Profiler {
@@ -67,6 +68,10 @@ public:
   Profiler(bool enabled) : enabled_(enabled) { }
 
   Toc tic(const std::string &name) {
+    return tic(name, []{});
+  }
+
+  Toc tic(const std::string &name, const std::function<void()> &sync) {
     if (!enabled_) {
       return Toc();
     }
@@ -76,7 +81,8 @@ public:
       it = profiles_.insert(
           std::make_pair(name, std::unique_ptr<Profile>(new Profile()))).first;
     }
-    return Toc(std::chrono::high_resolution_clock::now(), it->second.get());
+    auto now = std::chrono::high_resolution_clock::now();
+    return Toc(now, it->second.get(), sync);
   }
 
   std::string to_string() const {

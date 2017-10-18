@@ -50,6 +50,11 @@ public:
     workspace_size_ = 0;
   }
 
+  void synchronize() const {
+    // TODO change stream
+    cudaStreamSynchronize(nullptr);
+  }
+
   cublasHandle_t cublas() {
     return h_cublas_;
   }
