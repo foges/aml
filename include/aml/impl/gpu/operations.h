@@ -262,7 +262,6 @@ void copy(aml::Handle h, const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
   } else {
     gpu::unary_op(h, in, out, IdentityFunctor<T, T>());
   }
-
 }
 
 template <typename Tin, typename Tout, int Dim>

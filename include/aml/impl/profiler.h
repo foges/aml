@@ -6,6 +6,7 @@
 #include <map>
 #include <memory>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <aml/defs.h>
@@ -98,26 +99,36 @@ public:
     std::sort(elements.begin(), elements.end(),
         [](const element &x, element &y){ return x > y; });
 
+    uint64_t total_time_us = 0;
     std::stringstream ss;
-    ss << "-------------------------------------------------------------------"
-       << std::endl;
-    ss << "| "
-       << std::setw(19) << "Name"      << " | "
-       << std::setw(19) << "Time (ms)" << " | "
-       << std::setw(19) << "Num calls" << " |"
-       << std::endl;
-    ss << "|-----------------------------------------------------------------|"
-       << std::endl;
 
-    for (auto &val : elements) {
-      ss << "| "
-         << std::setw(19) << std::get<2>(val) << " | "
-         << std::setw(19) << std::get<0>(val) / 1000 << " | "
-         << std::setw(19) << std::get<1>(val) << " |"
+    auto println = [&ss]{
+      ss << "----------------------------------------------------------------"
          << std::endl;
+    };
+    auto printrow = [&ss](const std::string &s1,
+                          const std::string &s2,
+                          const std::string &s3) {
+      int width = 18;
+      ss << "| "
+         << std::setw(width) << s1 << " | "
+         << std::setw(width) << s2 << " | "
+         << std::setw(width) << s3 << " |"
+         << std::endl;
+    };
+
+    println();
+    printrow("Name", "Time (ms)", "Num calls");
+    println();
+    for (auto &val : elements) {
+      printrow(std::get<2>(val),
+               std::to_string(std::get<0>(val) / 1000),
+               std::to_string(std::get<1>(val)));
+      total_time_us += std::get<0>(val);
     }
-    ss << "-------------------------------------------------------------------"
-       << std::endl;
+    println();
+    printrow("Total", std::to_string(total_time_us / 1000), "");
+    println();
 
     return ss.str();
   }
