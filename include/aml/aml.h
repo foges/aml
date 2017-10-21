@@ -5,6 +5,7 @@
 #include <aml/const_array.h>
 #include <aml/constants.h>
 #include <aml/device.h>
+#include <aml/expression.h>
 #include <aml/functors.h>
 #include <aml/handle.h>
 #include <aml/immutable_array.h>
