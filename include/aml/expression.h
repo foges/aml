@@ -160,5 +160,104 @@ operator+(const Expression<OpType, Dim> &x,
   return x + make_expression(y);
 }
 
+/** MINUS *********************************************************************/
+
+template <typename OpType1, typename OpType2, int Dim>
+Expression<BinaryOp<OpType1, OpType2, Minus>, Dim>
+operator-(const Expression<OpType1, Dim> &x,
+          const Expression<OpType2, Dim> &y) {
+  AML_ASSERT(x.size() == y.size(), "Size mismatch");
+  AML_ASSERT(x.device() == y.device(), "Device mismatch");
+
+  return { make_binary_op(x, y, Minus()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<BinaryOp<ArrayOp<T, Dim>, ArrayOp<T, Dim>, Minus>, Dim>
+operator-(const ImmutableArray<T, Dim> &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x) - make_expression(y);
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<ArrayOp<T, Dim>, OpType, Minus>, Dim>
+operator-(const ImmutableArray<T, Dim> &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x) - y;
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Minus>, Dim>
+operator-(const Expression<OpType, Dim> &x,
+          const ImmutableArray<T, Dim> &y) {
+  return x - make_expression(y);
+}
+
+/** MULTIPLY ******************************************************************/
+
+template <typename OpType1, typename OpType2, int Dim>
+Expression<BinaryOp<OpType1, OpType2, Multiply>, Dim>
+operator*(const Expression<OpType1, Dim> &x,
+          const Expression<OpType2, Dim> &y) {
+  AML_ASSERT(x.size() == y.size(), "Size mismatch");
+  AML_ASSERT(x.device() == y.device(), "Device mismatch");
+
+  return { make_binary_op(x, y, Multiply()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<BinaryOp<ArrayOp<T, Dim>, ArrayOp<T, Dim>, Multiply>, Dim>
+operator*(const ImmutableArray<T, Dim> &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x) * make_expression(y);
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<ArrayOp<T, Dim>, OpType, Multiply>, Dim>
+operator*(const ImmutableArray<T, Dim> &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x) * y;
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Multiply>, Dim>
+operator*(const Expression<OpType, Dim> &x,
+          const ImmutableArray<T, Dim> &y) {
+  return x * make_expression(y);
+}
+
+/** DIVIDE ********************************************************************/
+
+template <typename OpType1, typename OpType2, int Dim>
+Expression<BinaryOp<OpType1, OpType2, Divide>, Dim>
+operator/(const Expression<OpType1, Dim> &x,
+          const Expression<OpType2, Dim> &y) {
+  AML_ASSERT(x.size() == y.size(), "Size mismatch");
+  AML_ASSERT(x.device() == y.device(), "Device mismatch");
+
+  return { make_binary_op(x, y, Divide()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<BinaryOp<ArrayOp<T, Dim>, ArrayOp<T, Dim>, Divide>, Dim>
+operator/(const ImmutableArray<T, Dim> &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x) / make_expression(y);
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<ArrayOp<T, Dim>, OpType, Divide>, Dim>
+operator/(const ImmutableArray<T, Dim> &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x) / y;
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Divide>, Dim>
+operator/(const Expression<OpType, Dim> &x,
+          const ImmutableArray<T, Dim> &y) {
+  return x / make_expression(y);
+}
+
 }  // namespace aml
 

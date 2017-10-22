@@ -10,6 +10,11 @@ TEST(FunctorTest, Abs) {
   EXPECT_EQ(aml::Abs()(-0.5), 0.5);
 }
 
+TEST(FunctorTest, Divide) {
+  EXPECT_EQ(aml::Divide()(-0.5f, 0.5f), -1.0f);
+  EXPECT_EQ(aml::Divide()(12, 3), 4);
+}
+
 TEST(FunctorTest, Exp) {
   EXPECT_EQ(aml::Exp()(-0.5f), std::exp(-0.5f));
   EXPECT_EQ(aml::Exp()(-0.5), std::exp(-0.5));
@@ -48,6 +53,16 @@ TEST(FunctorTest, Min) {
   EXPECT_EQ(aml::Min()(0.25f, -0.5f), -0.5f);
   EXPECT_EQ(aml::Min()(-0.5, 0.25), -0.5);
   EXPECT_EQ(aml::Min()(0.25, -0.5), -0.5);
+}
+
+TEST(FunctorTest, Minus) {
+  EXPECT_EQ(aml::Minus()(2.0f, 2.0f), 0.0f);
+  EXPECT_EQ(aml::Minus()(-2.0, -1.5), -0.5);
+}
+
+TEST(FunctorTest, Multiply) {
+  EXPECT_EQ(aml::Multiply()(2.0f, 2.0f), 4.0f);
+  EXPECT_EQ(aml::Multiply()(2.0, -1.5), -3.0);
 }
 
 TEST(FunctorTest, Plus) {

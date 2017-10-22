@@ -14,6 +14,15 @@ public:
   }
 };
 
+class Divide {
+public:
+  template <typename T>
+  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+    return x / y;
+  }
+};
+
+
 class Exp {
 public:
   AML_HOST_DEVICE float operator()(const float &x) const {
@@ -65,6 +74,22 @@ public:
   template <typename T>
   AML_HOST_DEVICE T operator()(const T &x, const T &y) const {
     return x < y ? x : y;
+  }
+};
+
+class Minus {
+public:
+  template <typename T>
+  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+    return x - y;
+  }
+};
+
+class Multiply {
+public:
+  template <typename T>
+  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+    return x * y;
   }
 };
 
