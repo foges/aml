@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include <gtest/gtest.h>
 
 #include <aml/aml.h>
@@ -622,5 +624,93 @@ TEST_F(ExpressionTest, PowAS) {
 
   EXPECT_EQ(z.data()[0], 0);
   EXPECT_EQ(z.data()[1], 0);
+}
+
+/** ABS ***********************************************************************/
+
+TEST_F(ExpressionTest, AbsA) {
+  auto x = aml::ones<double, 2>(h, aml::CPU, {1, 2});
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::abs(x));
+
+  EXPECT_EQ(z.data()[0], 1);
+  EXPECT_EQ(z.data()[1], 1);
+}
+
+TEST_F(ExpressionTest, AbsE) {
+  auto x = aml::make_expression(aml::ones<double, 2>(h, aml::CPU, {1, 2}));
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::abs(x));
+
+  EXPECT_EQ(z.data()[0], 1);
+  EXPECT_EQ(z.data()[1], 1);
+}
+
+/** EXP ***********************************************************************/
+
+TEST_F(ExpressionTest, ExpA) {
+  auto x = aml::ones<double, 2>(h, aml::CPU, {1, 2});
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::exp(x));
+
+  EXPECT_EQ(z.data()[0], std::exp(1.0));
+  EXPECT_EQ(z.data()[1], std::exp(1.0));
+}
+
+TEST_F(ExpressionTest, ExpE) {
+  auto x = aml::make_expression(aml::ones<double, 2>(h, aml::CPU, {1, 2}));
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::exp(x));
+
+  EXPECT_EQ(z.data()[0], std::exp(1.0));
+  EXPECT_EQ(z.data()[1], std::exp(1.0));
+}
+
+/** LOG ***********************************************************************/
+
+TEST_F(ExpressionTest, LogA) {
+  auto x = aml::ones<double, 2>(h, aml::CPU, {1, 2});
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::log(x));
+
+  EXPECT_EQ(z.data()[0], 0);
+  EXPECT_EQ(z.data()[1], 0);
+}
+
+TEST_F(ExpressionTest, LogE) {
+  auto x = aml::make_expression(aml::ones<double, 2>(h, aml::CPU, {1, 2}));
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::log(x));
+
+  EXPECT_EQ(z.data()[0], 0);
+  EXPECT_EQ(z.data()[1], 0);
+}
+
+/** SQRT **********************************************************************/
+
+TEST_F(ExpressionTest, SqrtA) {
+  auto x = aml::ones<double, 2>(h, aml::CPU, {1, 2});
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::sqrt(x));
+
+  EXPECT_EQ(z.data()[0], 1);
+  EXPECT_EQ(z.data()[1], 1);
+}
+
+TEST_F(ExpressionTest, SqrtE) {
+  auto x = aml::make_expression(aml::ones<double, 2>(h, aml::CPU, {1, 2}));
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, aml::sqrt(x));
+
+  EXPECT_EQ(z.data()[0], 1);
+  EXPECT_EQ(z.data()[1], 1);
 }
 

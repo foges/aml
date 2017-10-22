@@ -662,12 +662,64 @@ pow(const ImmutableArray<T, Dim> &x,
   return pow(make_expression(x), make_expression(y, x.size(), x.device()));
 }
 
+/** ABS ***********************************************************************/
+
+template <typename OpType, int Dim>
+Expression<UnaryOp<OpType, Abs>, Dim>
+abs(const Expression<OpType, Dim> &x) {
+  return { make_unary_op(x, Abs()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<UnaryOp<ArrayOp<T, Dim>, Abs>, Dim>
+abs(const ImmutableArray<T, Dim> &x) {
+  return abs(make_expression(x));
+}
+
+/** EXP ***********************************************************************/
+
+template <typename OpType, int Dim>
+Expression<UnaryOp<OpType, Exp>, Dim>
+exp(const Expression<OpType, Dim> &x) {
+  return { make_unary_op(x, Exp()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<UnaryOp<ArrayOp<T, Dim>, Exp>, Dim>
+exp(const ImmutableArray<T, Dim> &x) {
+  return exp(make_expression(x));
+}
+
+/** LOG ***********************************************************************/
+
+template <typename OpType, int Dim>
+Expression<UnaryOp<OpType, Log>, Dim>
+log(const Expression<OpType, Dim> &x) {
+  return { make_unary_op(x, Log()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<UnaryOp<ArrayOp<T, Dim>, Log>, Dim>
+log(const ImmutableArray<T, Dim> &x) {
+  return log(make_expression(x));
+}
+
+/** SQRT **********************************************************************/
+
+template <typename OpType, int Dim>
+Expression<UnaryOp<OpType, Sqrt>, Dim>
+sqrt(const Expression<OpType, Dim> &x) {
+  return { make_unary_op(x, Sqrt()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<UnaryOp<ArrayOp<T, Dim>, Sqrt>, Dim>
+sqrt(const ImmutableArray<T, Dim> &x) {
+  return sqrt(make_expression(x));
+}
+
 /** TODO
- * Abs
- * Exp
- * Log
  * Neg
- * Sqrt
  */
 
 }  // namespace aml
