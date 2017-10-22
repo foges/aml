@@ -108,7 +108,7 @@ template <typename T, int Dim>
 class ArrayOp {
 public:
   ArrayOp(const ImmutableArray<T, Dim> &x)
-    : data_(x.data()), stride_(x.stride()) { }
+    : data_(x.data()), stride_(x.stride()), allocation_(x.allocation()) { }
 
   using value_type = T;
 
@@ -119,6 +119,7 @@ public:
 private:
   const T *data_;
   Shape<Dim> stride_;
+  std::shared_ptr<const Allocation> allocation_;
 };
 
 template <typename T, int Dim>
