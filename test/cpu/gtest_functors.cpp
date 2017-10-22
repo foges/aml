@@ -73,6 +73,7 @@ TEST(FunctorTest, Plus) {
 TEST(FunctorTest, Pow) {
   EXPECT_EQ(aml::Pow()(2.0f, 0.0f), 1.0f);
   EXPECT_EQ(aml::Pow()(2.0, 1.0), 2.0);
+  EXPECT_EQ(aml::Pow()(2.0, -1.0), 0.5);
 }
 
 TEST(FunctorTest, Sqrt) {
