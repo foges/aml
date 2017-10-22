@@ -13,7 +13,8 @@ struct Shape {
   AML_HOST_DEVICE Shape() : dims_() { }
 
   template <typename ...Ints>
-  AML_HOST_DEVICE Shape(const Ints&&... dims) : dims_{dims...} { }
+  AML_HOST_DEVICE Shape(const Ints&&... dims)
+      : dims_{static_cast<Index>(dims)...} { }
 
   AML_HOST_DEVICE Index operator[](int i) const {
     AML_DEBUG_ASSERT(i < Dim);
@@ -95,9 +96,9 @@ struct Shape {
   Index dims_[Dim == 0 ? 1 : Dim];
 };
 
-template <class... T>
-Shape<sizeof...(T)> make_shape(T&&... idx) {
-  return { std::forward<Index>(idx)... };
+template <typename ...T>
+Shape<sizeof...(T)> make_shape(T... idx) {
+  return { std::forward<T>(idx)... };
 }
 
 namespace impl {
