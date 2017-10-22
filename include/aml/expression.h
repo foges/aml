@@ -128,6 +128,28 @@ make_expression(const ImmutableArray<T, Dim> &x) {
   return { ArrayOp<T, Dim>(x), x.size(), x.device() };
 }
 
+template <typename T>
+class ConstOp {
+public:
+  ConstOp(const T &x) : x_(x) { }
+
+  using value_type = T;
+
+  template <int Dim>
+  T operator()(const Shape<Dim>&) const {
+    return x_;
+  }
+
+private:
+  T x_;
+};
+
+template <typename T, int Dim>
+Expression<ConstOp<T>, Dim>
+make_expression(const T &x, const Shape<Dim> &size, Device device) {
+  return { ConstOp<T>(x), size, device };
+}
+
 /** PLUS **********************************************************************/
 
 template <typename OpType1, typename OpType2, int Dim>
@@ -159,6 +181,47 @@ Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Plus>, Dim>
 operator+(const Expression<OpType, Dim> &x,
           const ImmutableArray<T, Dim> &y) {
   return x + make_expression(y);
+}
+
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Plus>, Dim>
+operator+(const Ts &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) + y;
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Plus>, Dim>
+operator+(const Expression<OpType, Dim> &x,
+          const Ts &y) {
+  return x + make_expression(y, x.size(), x.device());
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Plus>, Dim>
+operator+(const Ts &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) + make_expression(y);
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Plus>, Dim>
+operator+(const ImmutableArray<T, Dim> &x,
+          const Ts &y) {
+  return make_expression(x) + make_expression(y, x.size(), x.device());
 }
 
 /** MINUS *********************************************************************/
@@ -194,6 +257,46 @@ operator-(const Expression<OpType, Dim> &x,
   return x - make_expression(y);
 }
 
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Minus>, Dim>
+operator-(const Ts &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) - y;
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Minus>, Dim>
+operator-(const Expression<OpType, Dim> &x,
+          const Ts &y) {
+  return x - make_expression(y, x.size(), x.device());
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Minus>, Dim>
+operator-(const Ts &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) - make_expression(y);
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Minus>, Dim>
+operator-(const ImmutableArray<T, Dim> &x,
+          const Ts &y) {
+  return make_expression(x) - make_expression(y, x.size(), x.device());
+}
+
 /** MULTIPLY ******************************************************************/
 
 template <typename OpType1, typename OpType2, int Dim>
@@ -227,6 +330,46 @@ operator*(const Expression<OpType, Dim> &x,
   return x * make_expression(y);
 }
 
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Multiply>, Dim>
+operator*(const Ts &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) *  y;
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Multiply>, Dim>
+operator*(const Expression<OpType, Dim> &x,
+          const Ts &y) {
+  return x * make_expression(y, x.size(), x.device());
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Multiply>, Dim>
+operator*(const Ts &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) * make_expression(y);
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Multiply>, Dim>
+operator*(const ImmutableArray<T, Dim> &x,
+          const Ts &y) {
+  return make_expression(x) * make_expression(y, x.size(), x.device());
+}
+
 /** DIVIDE ********************************************************************/
 
 template <typename OpType1, typename OpType2, int Dim>
@@ -258,6 +401,46 @@ Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Divide>, Dim>
 operator/(const Expression<OpType, Dim> &x,
           const ImmutableArray<T, Dim> &y) {
   return x / make_expression(y);
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Divide>, Dim>
+operator/(const Ts &x,
+          const Expression<OpType, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) /  y;
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Divide>, Dim>
+operator/(const Expression<OpType, Dim> &x,
+          const Ts &y) {
+  return x / make_expression(y, x.size(), x.device());
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Divide>, Dim>
+operator/(const Ts &x,
+          const ImmutableArray<T, Dim> &y) {
+  return make_expression(x, y.size(), y.device()) / make_expression(y);
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Divide>, Dim>
+operator/(const ImmutableArray<T, Dim> &x,
+          const Ts &y) {
+  return make_expression(x) / make_expression(y, x.size(), x.device());
 }
 
 }  // namespace aml

@@ -87,3 +87,9 @@
 
 #endif  // endif AML_GPU
 
+namespace aml {
+
+template <bool B, typename T = void>
+using enable_if_t = typename std::enable_if<B, T>::type;
+
+}  // namespace aml
