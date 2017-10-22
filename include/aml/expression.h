@@ -443,5 +443,232 @@ operator/(const ImmutableArray<T, Dim> &x,
   return make_expression(x) / make_expression(y, x.size(), x.device());
 }
 
+/** MIN ***********************************************************************/
+
+template <typename OpType1, typename OpType2, int Dim>
+Expression<BinaryOp<OpType1, OpType2, Min>, Dim>
+min(const Expression<OpType1, Dim> &x,
+    const Expression<OpType2, Dim> &y) {
+  AML_ASSERT(x.size() == y.size(), "Size mismatch");
+  AML_ASSERT(x.device() == y.device(), "Device mismatch");
+
+  return { make_binary_op(x, y, Min()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<BinaryOp<ArrayOp<T, Dim>, ArrayOp<T, Dim>, Min>, Dim>
+min(const ImmutableArray<T, Dim> &x,
+    const ImmutableArray<T, Dim> &y) {
+  return min(make_expression(x), make_expression(y));
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<ArrayOp<T, Dim>, OpType, Min>, Dim>
+min(const ImmutableArray<T, Dim> &x,
+    const Expression<OpType, Dim> &y) {
+  return min(make_expression(x), y);
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Min>, Dim>
+min(const Expression<OpType, Dim> &x,
+    const ImmutableArray<T, Dim> &y) {
+  return min(x, make_expression(y));
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Min>, Dim>
+min(const Ts &x,
+    const Expression<OpType, Dim> &y) {
+  return min(make_expression(x, y.size(), y.device()), y);
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Min>, Dim>
+min(const Expression<OpType, Dim> &x,
+    const Ts &y) {
+  return min(x, make_expression(y, x.size(), x.device()));
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Min>, Dim>
+min(const Ts &x,
+    const ImmutableArray<T, Dim> &y) {
+  return min(make_expression(x, y.size(), y.device()), make_expression(y));
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Min>, Dim>
+min(const ImmutableArray<T, Dim> &x,
+    const Ts &y) {
+  return min(make_expression(x), make_expression(y, x.size(), x.device()));
+}
+
+/** MAX ***********************************************************************/
+
+template <typename OpType1, typename OpType2, int Dim>
+Expression<BinaryOp<OpType1, OpType2, Max>, Dim>
+max(const Expression<OpType1, Dim> &x,
+    const Expression<OpType2, Dim> &y) {
+  AML_ASSERT(x.size() == y.size(), "Size mismatch");
+  AML_ASSERT(x.device() == y.device(), "Device mismatch");
+
+  return { make_binary_op(x, y, Max()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<BinaryOp<ArrayOp<T, Dim>, ArrayOp<T, Dim>, Max>, Dim>
+max(const ImmutableArray<T, Dim> &x,
+    const ImmutableArray<T, Dim> &y) {
+  return max(make_expression(x), make_expression(y));
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<ArrayOp<T, Dim>, OpType, Max>, Dim>
+max(const ImmutableArray<T, Dim> &x,
+    const Expression<OpType, Dim> &y) {
+  return max(make_expression(x), y);
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Max>, Dim>
+max(const Expression<OpType, Dim> &x,
+    const ImmutableArray<T, Dim> &y) {
+  return max(x, make_expression(y));
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Max>, Dim>
+max(const Ts &x,
+    const Expression<OpType, Dim> &y) {
+  return max(make_expression(x, y.size(), y.device()), y);
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Max>, Dim>
+max(const Expression<OpType, Dim> &x,
+    const Ts &y) {
+  return max(x, make_expression(y, x.size(), x.device()));
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Max>, Dim>
+max(const Ts &x,
+    const ImmutableArray<T, Dim> &y) {
+  return max(make_expression(x, y.size(), y.device()), make_expression(y));
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Max>, Dim>
+max(const ImmutableArray<T, Dim> &x,
+    const Ts &y) {
+  return max(make_expression(x), make_expression(y, x.size(), x.device()));
+}
+
+/** POW ***********************************************************************/
+
+template <typename OpType1, typename OpType2, int Dim>
+Expression<BinaryOp<OpType1, OpType2, Pow>, Dim>
+pow(const Expression<OpType1, Dim> &x,
+    const Expression<OpType2, Dim> &y) {
+  AML_ASSERT(x.size() == y.size(), "Size mismatch");
+  AML_ASSERT(x.device() == y.device(), "Device mismatch");
+
+  return { make_binary_op(x, y, Pow()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<BinaryOp<ArrayOp<T, Dim>, ArrayOp<T, Dim>, Pow>, Dim>
+pow(const ImmutableArray<T, Dim> &x,
+    const ImmutableArray<T, Dim> &y) {
+  return pow(make_expression(x), make_expression(y));
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<ArrayOp<T, Dim>, OpType, Pow>, Dim>
+pow(const ImmutableArray<T, Dim> &x,
+    const Expression<OpType, Dim> &y) {
+  return pow(make_expression(x), y);
+}
+
+template <typename T, int Dim, typename OpType>
+Expression<BinaryOp<OpType, ArrayOp<T, Dim>, Pow>, Dim>
+pow(const Expression<OpType, Dim> &x,
+    const ImmutableArray<T, Dim> &y) {
+  return pow(x, make_expression(y));
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, OpType, Pow>, Dim>
+pow(const Ts &x,
+    const Expression<OpType, Dim> &y) {
+  return pow(make_expression(x, y.size(), y.device()), y);
+}
+
+template <int Dim,
+          typename OpType,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<OpType, ConstOp<Ts>, Pow>, Dim>
+pow(const Expression<OpType, Dim> &x,
+    const Ts &y) {
+  return pow(x, make_expression(y, x.size(), x.device()));
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ConstOp<Ts>, ArrayOp<T, Dim>, Pow>, Dim>
+pow(const Ts &x,
+    const ImmutableArray<T, Dim> &y) {
+  return pow(make_expression(x, y.size(), y.device()), make_expression(y));
+}
+
+template <typename T,
+          int Dim,
+          typename Ts,
+          typename = enable_if_t<std::is_arithmetic<Ts>::value>>
+Expression<BinaryOp<ArrayOp<T, Dim>, ConstOp<Ts>, Pow>, Dim>
+pow(const ImmutableArray<T, Dim> &x,
+    const Ts &y) {
+  return pow(make_expression(x), make_expression(y, x.size(), x.device()));
+}
+
+/** TODO
+ * Abs
+ * Exp
+ * Log
+ * Neg
+ * Sqrt
+ */
+
 }  // namespace aml
 

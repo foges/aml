@@ -17,7 +17,7 @@ public:
 class Divide {
 public:
   template <typename T>
-  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+  AML_HOST_DEVICE T operator()(const T &x, const T &y) const {
     return x / y;
   }
 };
@@ -80,7 +80,7 @@ public:
 class Minus {
 public:
   template <typename T>
-  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+  AML_HOST_DEVICE T operator()(const T &x, const T &y) const {
     return x - y;
   }
 };
@@ -88,7 +88,7 @@ public:
 class Multiply {
 public:
   template <typename T>
-  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+  AML_HOST_DEVICE T operator()(const T &x, const T &y) const {
     return x * y;
   }
 };
@@ -96,8 +96,19 @@ public:
 class Plus {
 public:
   template <typename T>
-  AML_HOST_DEVICE T operator()(const T &x, const T&y) const {
+  AML_HOST_DEVICE T operator()(const T &x, const T &y) const {
     return x + y;
+  }
+};
+
+class Pow {
+public:
+  AML_HOST_DEVICE float operator()(const float &x, const float &y) const {
+    return powf(x, y);
+  }
+
+  AML_HOST_DEVICE double operator()(const double &x, const double &y) const {
+    return pow(x, y);
   }
 };
 
