@@ -65,6 +65,11 @@ TEST(FunctorTest, Multiply) {
   EXPECT_EQ(aml::Multiply()(2.0, -1.5), -3.0);
 }
 
+TEST(FunctorTest, Negative) {
+  EXPECT_EQ(aml::Negative()(2.0f), -2.0f);
+  EXPECT_EQ(aml::Negative()(-1.5), 1.5);
+}
+
 TEST(FunctorTest, Plus) {
   EXPECT_EQ(aml::Plus()(2.0f, -2.0f), 0.0f);
   EXPECT_EQ(aml::Plus()(2.0, 1.5), 3.5);

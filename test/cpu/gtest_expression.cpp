@@ -692,6 +692,28 @@ TEST_F(ExpressionTest, LogE) {
   EXPECT_EQ(z.data()[1], 0);
 }
 
+/** NEGATIVE ******************************************************************/
+
+TEST_F(ExpressionTest, NegA) {
+  auto x = aml::ones<double, 2>(h, aml::CPU, {1, 2});
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, -x);
+
+  EXPECT_EQ(z.data()[0], -1);
+  EXPECT_EQ(z.data()[1], -1);
+}
+
+TEST_F(ExpressionTest, NegE) {
+  auto x = aml::make_expression(aml::ones<double, 2>(h, aml::CPU, {1, 2}));
+  auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
+
+  aml::eval(h, z, -x);
+
+  EXPECT_EQ(z.data()[0], -1);
+  EXPECT_EQ(z.data()[1], -1);
+}
+
 /** SQRT **********************************************************************/
 
 TEST_F(ExpressionTest, SqrtA) {

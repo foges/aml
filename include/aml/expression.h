@@ -704,6 +704,20 @@ log(const ImmutableArray<T, Dim> &x) {
   return log(make_expression(x));
 }
 
+/** NEGATIVE ******************************************************************/
+
+template <typename OpType, int Dim>
+Expression<UnaryOp<OpType, Negative>, Dim>
+operator-(const Expression<OpType, Dim> &x) {
+  return { make_unary_op(x, Negative()), x.size(), x.device() };
+}
+
+template <typename T, int Dim>
+Expression<UnaryOp<ArrayOp<T, Dim>, Negative>, Dim>
+operator-(const ImmutableArray<T, Dim> &x) {
+  return -make_expression(x);
+}
+
 /** SQRT **********************************************************************/
 
 template <typename OpType, int Dim>
@@ -717,10 +731,6 @@ Expression<UnaryOp<ArrayOp<T, Dim>, Sqrt>, Dim>
 sqrt(const ImmutableArray<T, Dim> &x) {
   return sqrt(make_expression(x));
 }
-
-/** TODO
- * Neg
- */
 
 }  // namespace aml
 
