@@ -26,7 +26,7 @@ DEPS=-Iinclude -isystem ${GTEST_DIR}/include
 
 NVCC=nvcc -ccbin=${CC}
 NVFLAGS=-std=c++11 -arch ${CUDA_ARCH} \
-    --compiler-options -Wall,-Wextra \
+    --compiler-options -Wall,-Wextra,-Wno-unknown-pragmas \
     ${EXTRA_FLAGS} -DAML_GPU -x cu
 NVDEPS=-isystem ${CUDA_DIR}/include
 CUDA_LDFLAGS=-L${CUDA_LIB_DIR} -lcuda -lcudart -lcublas -lcusolver
