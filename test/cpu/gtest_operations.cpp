@@ -58,44 +58,6 @@ TEST_F(OperationsTest, CopyNonContiguous) {
   EXPECT_EQ(c.data()[1], -9);
 }
 
-TEST_F(OperationsTest, UnaryOpAbs) {
-  std::vector<int> data = {-4, 2, -3, -9};
-  auto a = aml::make_array(data, aml::make_shape(1, 2, 1, 2));
-  aml::unary_op(h, a, a, aml::Abs());
-  EXPECT_EQ(a.data()[0], 4);
-  EXPECT_EQ(a.data()[1], 2);
-  EXPECT_EQ(a.data()[2], 3);
-  EXPECT_EQ(a.data()[3], 9);
-}
-
-TEST_F(OperationsTest, BinaryOpMax) {
-  std::vector<int> data1 = {4, 5, 3, 7};
-  std::vector<int> data2 = {8, 4, 1, 9};
-  auto in1 = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
-  auto in2 = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
-  auto out = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 2, 1));
-  aml::binary_op(h, in1, in2, out, aml::Max());
-  EXPECT_EQ(out.data()[0], 8);
-  EXPECT_EQ(out.data()[1], 5);
-  EXPECT_EQ(out.data()[2], 3);
-  EXPECT_EQ(out.data()[3], 9);
-}
-
-TEST_F(OperationsTest, BinaryOpMaxSlice) {
-  std::vector<int> data1 = {4, 5, 3, 7};
-  std::vector<int> data2 = {8, 4, 1, 9};
-  auto in1 = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
-  auto in2 = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
-  auto in1s = aml::slice(in1, aml::make_shape(0, 1, 0, 0),
-      aml::make_shape(1, 2, 2, 1));
-  auto in2s = aml::slice(in2, aml::make_shape(0, 1, 0, 0),
-      aml::make_shape(1, 2, 2, 1));
-  auto out = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 1, 2, 1));
-  aml::binary_op(h, in1s, in2s, out, aml::Min());
-  EXPECT_EQ(out.data()[0], 4);
-  EXPECT_EQ(out.data()[1], 7);
-}
-
 TEST_F(OperationsTest, ReduceMax) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0};

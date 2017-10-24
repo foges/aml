@@ -34,79 +34,6 @@ void set(aml::Handle h, Array<T, Dim> &out, const T &val) {
   tic.stop();
 }
 
-/** UNARY_OP ******************************************************************/
-
-template <typename Tin, typename Tout, int Dim, typename Op>
-__global__ void unary_op(const Tin *in,
-                         Tout *out,
-                         Shape<Dim> size,
-                         Shape<Dim> stride_in,
-                         Shape<Dim> stride_out,
-                         Op op) {
-  Index tid = blockIdx.x * blockDim.x + threadIdx.x;
-  Index tstride = blockDim.x * gridDim.x;
-  for (Index i = tid; i < size.numel(); i += tstride) {
-    Shape<Dim> idx = impl::shape_index(size, i);
-    Index offset_in = impl::dot(idx, stride_in);
-    Index offset_out = impl::dot(idx, stride_out);
-    out[offset_out] = op(in[offset_in]);
-  }
-}
-
-template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(aml::Handle h,
-              const ImmutableArray<Tin, Dim> &in,
-              Array<Tout, Dim> &out,
-              const Op &op) {
-  auto tic = h.tic("gpu_unary_op_" + std::to_string(in.size().numel()),
-      [h]{ h.synchronize(); });
-
-  auto dims = launch_dims(h.gpu(), in.size().numel());
-  unary_op<<<dims.first, dims.second>>>(
-      in.data(), out.data(), in.size(), in.stride(), out.stride(), op);
-
-  tic.stop();
-}
-
-/** BINARY_OP *****************************************************************/
-
-template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-__global__ void binary_op(const Tin1 *in1,
-                          const Tin2 *in2,
-                          Tout *out,
-                          Shape<Dim> size,
-                          Shape<Dim> stride_in1,
-                          Shape<Dim> stride_in2,
-                          Shape<Dim> stride_out,
-                          Op op) {
-  Index tid = blockIdx.x * blockDim.x + threadIdx.x;
-  Index tstride = blockDim.x * gridDim.x;
-  for (Index i = tid; i < size.numel(); i += tstride) {
-    Shape<Dim> idx = impl::shape_index(size, i);
-    Index offset_in1 = impl::dot(idx, stride_in1);
-    Index offset_in2 = impl::dot(idx, stride_in2);
-    Index offset_out = impl::dot(idx, stride_out);
-    out[offset_out] = op(in1[offset_in1], in2[offset_in2]);
-  }
-}
-
-template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(aml::Handle h,
-               const ImmutableArray<Tin1, Dim> &in1,
-               const ImmutableArray<Tin2, Dim> &in2,
-               Array<Tout, Dim> &out,
-               const Op &op) {
-  auto tic = h.tic("gpu_binary_op_" + std::to_string(in1.size().numel()),
-      [h]{ h.synchronize(); });
-
-  auto dims = launch_dims(h.gpu(), in1.size().numel());
-  binary_op<<<dims.first, dims.second>>>(
-      in1.data(), in2.data(), out.data(), in1.size(),
-      in1.stride(), in2.stride(), out.stride(), op);
-
-  tic.stop();
-}
-
 /** REDUCE ********************************************************************/
 
 template <typename Tin,
@@ -260,7 +187,7 @@ void copy(aml::Handle h, const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
       tic.stop();
     }
   } else {
-    gpu::unary_op(h, in, out, IdentityFunctor<T, T>());
+    aml::eval(h, out, make_expression(in));
   }
 }
 
@@ -268,7 +195,7 @@ template <typename Tin, typename Tout, int Dim>
 void copy(aml::Handle h,
           const ImmutableArray<Tin, Dim> &in,
           Array<Tout, Dim> &out) {
-  gpu::unary_op(h, in, out, IdentityFunctor<Tin, Tout>());
+  aml::eval(h, out, make_expression(in));
 }
 
 }  // namespace gpu

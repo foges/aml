@@ -22,33 +22,6 @@ void copy(Handle h, const ImmutableArray<Tin, Dim> &in, Array<Tout, Dim> &out) {
   impl::copy(h, in, out);
 }
 
-template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(Handle h,
-              const ImmutableArray<Tin, Dim> &in,
-              Array<Tout, Dim> &out,
-              const Op &op) {
-  AML_ASSERT(in.device() == out.device(), "Device mismatch");
-  AML_ASSERT(in.size() == out.size(), "Shape mismatch");
-
-  AML_DEVICE_EVAL(in.device(), unary_op(h, in, out, op));
-}
-
-template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(Handle h,
-               const ImmutableArray<Tin1, Dim> &in1,
-               const ImmutableArray<Tin2, Dim> &in2,
-               Array<Tout, Dim> &out,
-               const Op &op) {
-  Device device = in1.device();
-  Shape<Dim> size = in1.size();
-
-  AML_ASSERT(device == in2.device() && device == out.device(),
-      "Device mismatch");
-  AML_ASSERT(size == in2.size() && size == out.size(), "Shape mismatch");
-
-  AML_DEVICE_EVAL(device, binary_op(h, in1, in2, out, op));
-}
-
 template <typename Tin,
           int DimIn,
           typename Tout,

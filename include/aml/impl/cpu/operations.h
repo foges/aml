@@ -5,6 +5,7 @@
 #include <aml/array.h>
 #include <aml/defs.h>
 #include <aml/immutable_array.h>
+#include <aml/expression.h>
 #include <aml/shape.h>
 
 namespace aml {
@@ -36,89 +37,6 @@ void set(aml::Handle h, Array<T, Dim> &out, const T &val) {
   auto tic = h.tic("cpu_set_" + std::to_string(out.size().numel()));
 
   set(out.data(), out.stride(), out.size(), val);
-
-  tic.stop();
-}
-
-/** UNARY_OP ******************************************************************/
-
-template <typename Tin, typename Tout, typename Op>
-void unary_op(const Tin *in,
-              const Shape<0>&,
-              Tout *out,
-              const Shape<0>&,
-              const Shape<0>&,
-              const Op &op) {
-  *out = op(*in);
-}
-
-template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(const Tin *in,
-              const Shape<Dim> &in_stride,
-              Tout *out,
-              const Shape<Dim> &out_stride,
-              const Shape<Dim> &size,
-              const Op &op) {
-  for (Index i = 0; i < size.head(); ++i) {
-    unary_op(
-        in + i * in_stride.head(), in_stride.tail(),
-        out + i * out_stride.head(), out_stride.tail(), size.tail(), op);
-  }
-}
-
-template <typename Tin, typename Tout, int Dim, typename Op>
-void unary_op(aml::Handle h,
-              const ImmutableArray<Tin, Dim> &in,
-              Array<Tout, Dim> &out,
-              const Op &op) {
-  auto tic = h.tic("cpu_unary_op_" + std::to_string(in.size().numel()));
-
-  unary_op(in.data(), in.stride(), out.data(), out.stride(), in.size(), op);
-
-  tic.stop();
-}
-
-/** BINARY_OP *****************************************************************/
-
-template <typename Tin1, typename Tin2, typename Tout, typename Op>
-void binary_op(const Tin1 *in1,
-               const Shape<0>&,
-               const Tin2 *in2,
-               const Shape<0>&,
-               Tout *out,
-               const Shape<0>&,
-               const Shape<0>&,
-               const Op &op) {
-  *out = op(*in1, *in2);
-}
-
-template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(const Tin1 *in1,
-               const Shape<Dim> &in1_stride,
-               const Tin2 *in2,
-               const Shape<Dim> &in2_stride,
-               Tout *out,
-               const Shape<Dim> &out_stride,
-               const Shape<Dim> &size,
-               const Op &op) {
-  for (Index i = 0; i < size.head(); ++i) {
-    binary_op(
-        in1 + i * in1_stride.head(), in1_stride.tail(),
-        in2 + i * in2_stride.head(), in2_stride.tail(),
-        out + i * out_stride.head(), out_stride.tail(), size.tail(), op);
-  }
-}
-
-template <typename Tin1, typename Tin2, typename Tout, int Dim, typename Op>
-void binary_op(aml::Handle h,
-               const ImmutableArray<Tin1, Dim> &in1,
-               const ImmutableArray<Tin2, Dim> &in2,
-               Array<Tout, Dim> &out,
-               const Op &op) {
-  auto tic = h.tic("cpu_binary_op_" + std::to_string(in1.size().numel()));
-
-  binary_op(in1.data(), in1.stride(), in2.data(), in2.stride(),
-      out.data(), out.stride(), in1.size(), op);
 
   tic.stop();
 }
@@ -197,7 +115,7 @@ void copy(aml::Handle h, const ImmutableArray<T, Dim> &in, Array<T, Dim> &out) {
     std::memcpy(out.data(), in.data(), in.size().numel() * sizeof(T));
     tic.stop();
   } else {
-    cpu::unary_op(h, in, out, [](const T &x){ return x; });
+    aml::eval(h, out, make_expression(in));
   }
 }
 
@@ -205,7 +123,7 @@ template <typename Tin, typename Tout, int Dim>
 void copy(aml::Handle h,
           const ImmutableArray<Tin, Dim> &in,
           Array<Tout, Dim> &out) {
-  cpu::unary_op(h, in, out, [](const Tin &x){ return static_cast<Tout>(x); });
+  aml::eval(h, out, make_expression(in));
 }
 
 }  // namespace cpu

@@ -89,59 +89,6 @@ TEST_F(OperationsTestGpu, CopyNonContiguous) {
   EXPECT_EQ(c_h.data()[1], -9);
 }
 
-TEST_F(OperationsTestGpu, UnaryOpAbs) {
-  std::vector<int> data = {-4, 2, -3, -9};
-  auto a_h = aml::make_array(data, aml::make_shape(1, 2, 1, 2));
-  auto a = aml::Array<int, 4>(aml::GPU, a_h.size());
-  aml::copy(h, a_h, a);
-  aml::unary_op(h, a, a, aml::Abs());
-  aml::copy(h, a, a_h);
-  EXPECT_EQ(a_h.data()[0], 4);
-  EXPECT_EQ(a_h.data()[1], 2);
-  EXPECT_EQ(a_h.data()[2], 3);
-  EXPECT_EQ(a_h.data()[3], 9);
-}
-
-TEST_F(OperationsTestGpu, BinaryOpMax) {
-  std::vector<int> data1 = {4, 5, 3, 7};
-  std::vector<int> data2 = {8, 4, 1, 9};
-  auto in1_h = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
-  auto in2_h = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
-  auto out_h = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 2, 1));
-  auto in1 = aml::Array<int, 4>(aml::GPU, in1_h.size());
-  auto in2 = aml::Array<int, 4>(aml::GPU, in2_h.size());
-  auto out = aml::Array<int, 4>(aml::GPU, out_h.size());
-  aml::copy(h, in1_h, in1);
-  aml::copy(h, in2_h, in2);
-  aml::binary_op(h, in1, in2, out, aml::Max());
-  aml::copy(h, out, out_h);
-  EXPECT_EQ(out_h.data()[0], 8);
-  EXPECT_EQ(out_h.data()[1], 5);
-  EXPECT_EQ(out_h.data()[2], 3);
-  EXPECT_EQ(out_h.data()[3], 9);
-}
-
-TEST_F(OperationsTestGpu, BinaryOpMaxSlice) {
-  std::vector<int> data1 = {4, 5, 3, 7};
-  std::vector<int> data2 = {8, 4, 1, 9};
-  auto in1_h = aml::make_array(data1, aml::make_shape(1, 2, 2, 1));
-  auto in2_h = aml::make_array(data2, aml::make_shape(1, 2, 2, 1));
-  auto out_h = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 1, 2, 1));
-  auto in1 = aml::Array<int, 4>(aml::GPU, in1_h.size());
-  auto in2 = aml::Array<int, 4>(aml::GPU, in2_h.size());
-  auto in1s = aml::slice(in1, aml::make_shape(0, 1, 0, 0),
-      aml::make_shape(1, 2, 2, 1));
-  auto in2s = aml::slice(in2, aml::make_shape(0, 1, 0, 0),
-      aml::make_shape(1, 2, 2, 1));
-  auto out = aml::Array<int, 4>(aml::GPU, out_h.size());
-  aml::copy(h, in1_h, in1);
-  aml::copy(h, in2_h, in2);
-  aml::binary_op(h, in1s, in2s, out, aml::Min());
-  aml::copy(h, out, out_h);
-  EXPECT_EQ(out_h.data()[0], 4);
-  EXPECT_EQ(out_h.data()[1], 7);
-}
-
 TEST_F(OperationsTestGpu, ReduceMax) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0};
