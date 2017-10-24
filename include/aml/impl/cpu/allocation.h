@@ -16,5 +16,5 @@ inline void free(void *data) {
 
 }  // namespace cpu
 }  // namespace impl
-}  // namespace ml
+}  // namespace aml
 

@@ -694,7 +694,7 @@ TEST_F(ExpressionTest, LogE) {
 
 /** NEGATIVE ******************************************************************/
 
-TEST_F(ExpressionTest, NegA) {
+TEST_F(ExpressionTest, NegativeA) {
   auto x = aml::ones<double, 2>(h, aml::CPU, {1, 2});
   auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
 
@@ -704,7 +704,7 @@ TEST_F(ExpressionTest, NegA) {
   EXPECT_EQ(z.data()[1], -1);
 }
 
-TEST_F(ExpressionTest, NegE) {
+TEST_F(ExpressionTest, NegativeE) {
   auto x = aml::make_expression(aml::ones<double, 2>(h, aml::CPU, {1, 2}));
   auto z = aml::nans<double, 2>(h, aml::CPU, {1, 2});
 

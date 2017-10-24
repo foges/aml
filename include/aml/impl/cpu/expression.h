@@ -30,16 +30,16 @@ void eval(T *out,
 }
 
 template <typename T, int Dim, typename Op>
-void eval(Handle h, Array<T, Dim> &x, const Op &op) {
-  auto tic = h.tic("cpu_eval_" + std::to_string(x.size().numel()));
+void eval(Handle h, Array<T, Dim> &out, const Op &op) {
+  auto tic = h.tic("cpu_eval_" + std::to_string(out.size().numel()));
 
   Shape<Dim> idx;
-  eval(x.data(), x.stride(), x.size(), idx, op);
+  eval(out.data(), out.stride(), out.size(), idx, op);
 
   tic.stop();
 }
 
 }  // namespace cpu
 }  // namespace impl
-}  // namespace ml
+}  // namespace aml
 

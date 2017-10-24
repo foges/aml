@@ -59,7 +59,7 @@ public:
                                  typename OpType2::value_type)>::type;
 
   template <int Dim>
-  value_type operator()(const Shape<Dim> &idx) const {
+  AML_HOST_DEVICE value_type operator()(const Shape<Dim> &idx) const {
     return binary_op_(op1_(idx), op2_(idx));
   }
 
@@ -88,7 +88,7 @@ public:
       typename std::result_of<Op(typename OpType::value_type)>::type;
 
   template <int Dim>
-  value_type operator()(const Shape<Dim> &idx) const {
+  AML_HOST_DEVICE value_type operator()(const Shape<Dim> &idx) const {
     return unary_op_(op_(idx));
   }
 
@@ -112,7 +112,7 @@ public:
 
   using value_type = T;
 
-  T operator()(const Shape<Dim> &idx) const {
+  AML_HOST_DEVICE value_type operator()(const Shape<Dim> &idx) const {
     return data_[impl::dot(idx, stride_)];
   }
 
@@ -136,7 +136,7 @@ public:
   using value_type = T;
 
   template <int Dim>
-  T operator()(const Shape<Dim>&) const {
+  AML_HOST_DEVICE value_type operator()(const Shape<Dim>&) const {
     return x_;
   }
 
