@@ -19,7 +19,7 @@ protected:
 };
 
 TEST_F(ExpressionTestGpu, Unary) {
-  auto x = aml::Array<double, 4>(aml::GPU, aml::make_shape(1, 2, 1, 2));
+  auto x = aml::Array<double, 4>(aml::GPU, {1, 2, 1, 2});
   auto y = aml::Array<double, 4>(aml::GPU, x.size());
   aml::set(h, x, 1.0);
   auto y_h = aml::Array<double, 4>(aml::CPU, x.size());
@@ -34,7 +34,7 @@ TEST_F(ExpressionTestGpu, Unary) {
 }
 
 TEST_F(ExpressionTestGpu, Binary) {
-  auto x = aml::Array<double, 4>(aml::GPU, aml::make_shape(1, 2, 1, 2));
+  auto x = aml::Array<double, 4>(aml::GPU, {1, 2, 1, 2});
   auto y = aml::Array<double, 4>(aml::GPU, x.size());
   auto z = aml::Array<double, 4>(aml::GPU, x.size());
   aml::set(h, x, 2.0);

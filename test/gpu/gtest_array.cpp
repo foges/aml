@@ -3,7 +3,7 @@
 #include <aml/aml.h>
 
 TEST(ArrayTestGpu, Constructor) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
   EXPECT_EQ(a.device(), aml::GPU);
   EXPECT_NE(a.allocation(), nullptr);
   EXPECT_EQ(a.allocation()->size(), 3 * 4 * sizeof(float));
@@ -14,9 +14,8 @@ TEST(ArrayTestGpu, Constructor) {
 }
 
 TEST(ArrayTestGpu, Slice) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
-  aml::Array<float, 2> s =
-      aml::slice(a, aml::make_shape(1, 1), aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
+  aml::Array<float, 2> s = aml::slice(a, {1, 1}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::GPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -27,9 +26,8 @@ TEST(ArrayTestGpu, Slice) {
 }
 
 TEST(ArrayTestGpu, ContiguousSlice) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
-  aml::Array<float, 2> s =
-      aml::slice(a, aml::make_shape(0, 2), aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
+  aml::Array<float, 2> s = aml::slice(a, {0, 2}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::GPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -40,9 +38,8 @@ TEST(ArrayTestGpu, ContiguousSlice) {
 }
 
 TEST(ArrayTestGpu, Reshape) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
-  aml::Array<float, 3> r =
-      aml::reshape(a, aml::make_shape(6, 2, 1));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
+  aml::Array<float, 3> r = aml::reshape<3>(a, {6, 2, 1});
 
   EXPECT_EQ(r.device(), aml::GPU);
   EXPECT_EQ(r.allocation(), a.allocation());

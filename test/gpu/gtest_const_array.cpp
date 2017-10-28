@@ -3,7 +3,7 @@
 #include <aml/aml.h>
 
 TEST(ConstArrayTestGpu, Constructor1) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
   EXPECT_EQ(ca.device(), aml::GPU);
   EXPECT_NE(ca.allocation(), nullptr);
@@ -15,10 +15,9 @@ TEST(ConstArrayTestGpu, Constructor1) {
 }
 
 TEST(ConstArrayTestGpu, Slice) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
-  aml::ConstArray<float, 2> s =
-      aml::slice(ca, aml::make_shape(1, 1), aml::make_shape(3, 4));
+  aml::ConstArray<float, 2> s = aml::slice(ca, {1, 1}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::GPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -29,10 +28,9 @@ TEST(ConstArrayTestGpu, Slice) {
 }
 
 TEST(ConstArrayTestGpu, ContiguousSlice) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
-  aml::ConstArray<float, 2> s =
-      aml::slice(ca, aml::make_shape(0, 2), aml::make_shape(3, 4));
+  aml::ConstArray<float, 2> s = aml::slice(ca, {0, 2}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::GPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -43,10 +41,9 @@ TEST(ConstArrayTestGpu, ContiguousSlice) {
 }
 
 TEST(ConstArrayTestGpu, Reshape) {
-  aml::Array<float, 2> a(aml::GPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::GPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
-  aml::ConstArray<float, 3> r =
-      aml::reshape(ca, aml::make_shape(6, 2, 1));
+  aml::ConstArray<float, 3> r = aml::reshape<3>(ca, {6, 2, 1});
 
   EXPECT_EQ(r.device(), aml::GPU);
   EXPECT_EQ(r.allocation(), a.allocation());

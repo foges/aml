@@ -17,9 +17,9 @@ protected:
 };
 
 TEST_F(OperationsTestGpu, Set) {
-  auto a = aml::Array<int, 4>(aml::GPU, aml::make_shape(1, 2, 1, 2));
+  auto a = aml::Array<int, 4>(aml::GPU, {1, 2, 1, 2});
   aml::set(h, a, 9);
-  auto a_h = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 1, 2));
+  auto a_h = aml::Array<int, 4>(aml::CPU, {1, 2, 1, 2});
   aml::copy(h, a, a_h);
 
   EXPECT_EQ(a_h.data()[0], 9);
@@ -33,7 +33,7 @@ TEST_F(OperationsTestGpu, CopyCpu) {
   auto a = aml::make_array(data, aml::make_shape(2, 2));
   auto b = aml::Array<int, 2>(aml::GPU, a.size());
   aml::copy(h, a, b);
-  auto b_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
+  auto b_h = aml::Array<int, 2>(aml::CPU, {2, 2});
   aml::copy(h, b, b_h);
 
   EXPECT_EQ(b_h.data()[0], 4);
@@ -49,7 +49,7 @@ TEST_F(OperationsTestGpu, Copy) {
   auto c = aml::Array<int, 2>(aml::GPU, a.size());
   aml::copy(h, a, b);
   aml::copy(h, b, c);
-  auto c_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
+  auto c_h = aml::Array<int, 2>(aml::CPU, c.size());
   aml::copy(h, c, c_h);
 
   EXPECT_EQ(c_h.data()[0], 4);
@@ -65,7 +65,7 @@ TEST_F(OperationsTestGpu, CopyTypeCast) {
   auto c = aml::Array<int, 2>(aml::GPU, a.size());
   aml::copy(h, a, b);
   aml::copy(h, b, c);
-  auto c_h = aml::Array<int, 2>(aml::CPU, aml::make_shape(2, 2));
+  auto c_h = aml::Array<int, 2>(aml::CPU, c.size());
   aml::copy(h, c, c_h);
 
   EXPECT_EQ(c_h.data()[0], 4);
@@ -79,7 +79,7 @@ TEST_F(OperationsTestGpu, CopyNonContiguous) {
   auto a_h = aml::make_array(data, aml::make_shape(2, 2));
   auto a = aml::Array<int, 2>(aml::GPU, a_h.size());
   aml::copy(h, a_h, a);
-  auto b = aml::slice(a, aml::make_shape(1, 0), aml::make_shape(2, 2));
+  auto b = aml::slice(a, {1, 0}, {2, 2});
   auto c = aml::Array<int, 2>(aml::GPU, b.size());
   aml::copy(h, b, c);
   auto c_h = aml::Array<int, 2>(aml::CPU, c.size());
@@ -122,8 +122,7 @@ TEST_F(OperationsTestGpu, ReduceMaxAbsSlice) {
   std::vector<int> res = {0};
   auto in_h = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
   auto in = aml::Array<int, 4>(aml::GPU, in_h.size());
-  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
-      aml::make_shape(1, 1, 2, 1));
+  auto ins = aml::slice(in, {0, 0, 0, 0}, {1, 1, 2, 1});
   auto out_h = aml::make_array(res, aml::Shape<0>());
   auto out = aml::Array<int, 0>(aml::GPU, out_h.size());
   aml::copy(h, in_h, in);
@@ -183,8 +182,7 @@ TEST_F(OperationsTestGpu, ReducePartialSliceSumLarge) {
   auto out1_h = aml::make_array(res1, aml::make_shape(N));
   auto out1 = aml::Array<int, 1>(aml::GPU, out1_h.size());
 
-  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
-      aml::make_shape(1, M / 2, 1, N / 2));
+  auto ins = aml::slice(in,{0, 0, 0, 0}, {1, M / 2, 1, N / 2});
   auto out0s_h = aml::make_array(res0s, aml::make_shape(M / 2));
   auto out0s = aml::Array<int, 1>(aml::GPU, out0s_h.size());
   auto out1s_h = aml::make_array(res1s, aml::make_shape(N / 2));

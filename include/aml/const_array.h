@@ -86,7 +86,7 @@ ConstArray<T, Dim> slice(const ImmutableArray<T, Dim> &array,
       array.stride());
 }
 
-template <typename T, int DimOld, int DimNew>
+template <int DimNew, typename T, int DimOld>
 ConstArray<T, DimNew> reshape(const ImmutableArray<T, DimOld> &array,
                               const Shape<DimNew> &size) {
   AML_ASSERT(array.size().numel() == size.numel(),
@@ -100,6 +100,12 @@ ConstArray<T, DimNew> reshape(const ImmutableArray<T, DimOld> &array,
       size,
       impl::strides(size));
 }
+
+// template <typename T, int DimOld, int DimNew>
+// ConstArray<T, DimNew> reshape(const ImmutableArray<T, DimOld> &array,
+//                               const int (&size)[DimNew]) {
+//   return reshape<T, DimOld, DimNew>(array, size);
+// }
 
 }  // namespace aml
 

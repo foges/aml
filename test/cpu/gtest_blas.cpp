@@ -107,19 +107,14 @@ TEST_F(BlasTest, GemmDoubleTT) {
 }
 
 TEST_F(BlasTest, Norm2Float) {
-  auto x = aml::reshape(Af, aml::make_shape(4));
+  auto x = aml::reshape<1>(Af, {4});
   float nrm2 = aml::nrm2(h, x);
   EXPECT_EQ(nrm2, std::sqrt(39.0f));
 }
 
 TEST_F(BlasTest, Norm2Double) {
-  auto x = aml::reshape(Ad, aml::make_shape(4));
+  auto x = aml::reshape<1>(Ad, {4});
   double nrm2 = aml::nrm2(h, x);
   EXPECT_EQ(nrm2, std::sqrt(39.0));
 }
-
-// TODO:
-// - Larger non-square
-// - alpha, beta != 1, 0
-// - strided
 

@@ -108,7 +108,7 @@ Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
       array.stride());
 }
 
-template <typename T, int DimOld, int DimNew>
+template <int DimNew, typename T, int DimOld>
 Array<T, DimNew> reshape(Array<T, DimOld> array, Shape<DimNew> size) {
   AML_ASSERT(array.size().numel() == size.numel(),
       "Reshape must keep the same number of elements");

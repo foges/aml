@@ -21,7 +21,7 @@ TEST(ArrayTest, DefaultConstructorConst) {
 }
 
 TEST(ArrayTest, Constructor) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
   EXPECT_EQ(a.device(), aml::CPU);
   EXPECT_NE(a.allocation(), nullptr);
   EXPECT_EQ(a.allocation()->size(), 3 * 4 * sizeof(float));
@@ -33,7 +33,7 @@ TEST(ArrayTest, Constructor) {
 
 TEST(ArrayTest, MakeArray) {
   std::vector<double> data = {4.0, 1.3, 1.4, 5.7, 6.9, 7.1};
-  aml::Shape<3> size = aml::make_shape(1, 2, 3);
+  aml::Shape<3> size = {1, 2, 3};
   aml::Array<double, 3> a = aml::make_array(data, size);
 
   EXPECT_EQ(a.device(), aml::CPU);
@@ -45,9 +45,8 @@ TEST(ArrayTest, MakeArray) {
 }
 
 TEST(ArrayTest, Slice) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
-  aml::Array<float, 2> s =
-      aml::slice(a, aml::make_shape(1, 1), aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
+  aml::Array<float, 2> s = aml::slice(a, {1, 1}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::CPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -58,9 +57,8 @@ TEST(ArrayTest, Slice) {
 }
 
 TEST(ArrayTest, ContiguousSlice) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
-  aml::Array<float, 2> s =
-      aml::slice(a, aml::make_shape(0, 2), aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
+  aml::Array<float, 2> s = aml::slice(a, {0, 2}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::CPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -71,9 +69,8 @@ TEST(ArrayTest, ContiguousSlice) {
 }
 
 TEST(ArrayTest, Reshape) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
-  aml::Array<float, 3> r =
-      aml::reshape(a, aml::make_shape(6, 2, 1));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
+  aml::Array<float, 3> r = aml::reshape<3>(a, {6, 2, 1});
 
   EXPECT_EQ(r.device(), aml::CPU);
   EXPECT_EQ(r.allocation(), a.allocation());

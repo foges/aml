@@ -25,10 +25,10 @@ public:
     auto Bf_h = aml::make_array(Bfl_h, aml::make_shape(2, 2));
     auto Ad_h = aml::make_array(Ado_h, aml::make_shape(2, 2));
     auto Bd_h = aml::make_array(Bdo_h, aml::make_shape(2, 2));
-    Af = aml::Array<float, 2>(aml::GPU, aml::make_shape(2, 2));
-    Bf = aml::Array<float, 2>(aml::GPU, aml::make_shape(2, 2));
-    Ad = aml::Array<double, 2>(aml::GPU, aml::make_shape(2, 2));
-    Bd = aml::Array<double, 2>(aml::GPU, aml::make_shape(2, 2));
+    Af = aml::Array<float, 2>(aml::GPU, {2, 2});
+    Bf = aml::Array<float, 2>(aml::GPU, {2, 2});
+    Ad = aml::Array<double, 2>(aml::GPU, {2, 2});
+    Bd = aml::Array<double, 2>(aml::GPU, {2, 2});
     aml::copy(h, Af_h, Af);
     aml::copy(h, Bf_h, Bf);
     aml::copy(h, Ad_h, Ad);
@@ -45,8 +45,8 @@ protected:
     std::vector<double> data_d = {0.0, 0.0, 0.0, 0.0};
     Cf_h = aml::make_array(data_f, aml::make_shape(2, 2));
     Cd_h = aml::make_array(data_d, aml::make_shape(2, 2));
-    Cf = aml::Array<float, 2>(aml::GPU, aml::make_shape(2, 2));
-    Cd = aml::Array<double, 2>(aml::GPU, aml::make_shape(2, 2));
+    Cf = aml::Array<float, 2>(aml::GPU, {2, 2});
+    Cd = aml::Array<double, 2>(aml::GPU, {2, 2});
     aml::copy(h, Cf_h, Cf);
     aml::copy(h, Cd_h, Cd);
   }

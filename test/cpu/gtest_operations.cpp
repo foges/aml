@@ -18,7 +18,7 @@ protected:
 
 
 TEST_F(OperationsTest, Set) {
-  auto a = aml::Array<int, 4>(aml::CPU, aml::make_shape(1, 2, 1, 2));
+  auto a = aml::Array<int, 4>(aml::CPU, {1, 2, 1, 2});
   aml::set(h, a, 9);
   EXPECT_EQ(a.data()[0], 9);
   EXPECT_EQ(a.data()[1], 9);
@@ -51,7 +51,7 @@ TEST_F(OperationsTest, CopyTypeCast) {
 TEST_F(OperationsTest, CopyNonContiguous) {
   std::vector<int> data = {4, 2, 3, -9};
   auto a = aml::make_array(data, aml::make_shape(2, 2));
-  auto b = aml::slice(a, aml::make_shape(1, 0), aml::make_shape(2, 2));
+  auto b = aml::slice(a, {1, 0}, {2, 2});
   auto c = aml::Array<int, 2>(aml::CPU, b.size());
   aml::copy(h, b, c);
   EXPECT_EQ(c.data()[0], 2);
@@ -80,8 +80,7 @@ TEST_F(OperationsTest, ReduceMaxAbsSlice) {
   std::vector<int> data = {4, -9, -3, 7};
   std::vector<int> res = {0};
   auto in = aml::make_array(data, aml::make_shape(1, 2, 2, 1));
-  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
-      aml::make_shape(1, 1, 2, 1));
+  auto ins = aml::slice(in, {0, 0, 0, 0}, {1, 1, 2, 1});
   auto out = aml::make_array(res, aml::Shape<0>());
   aml::reduce(h, ins, out, {{3, 1, 0, 2}}, aml::Abs(), aml::Max());
   EXPECT_EQ(out.data()[0], 4);
@@ -124,8 +123,7 @@ TEST_F(OperationsTest, ReducePartialSliceSumLarge) {
   auto out0 = aml::make_array(res0, aml::make_shape(M));
   auto out1 = aml::make_array(res1, aml::make_shape(N));
 
-  auto ins = aml::slice(in, aml::make_shape(0, 0, 0, 0),
-      aml::make_shape(1, M / 2, 1, N / 2));
+  auto ins = aml::slice(in, {0, 0, 0, 0}, {1, M / 2, 1, N / 2});
   auto out0s = aml::make_array(res0s, aml::make_shape(M / 2));
   auto out1s = aml::make_array(res1s, aml::make_shape(N / 2));
 

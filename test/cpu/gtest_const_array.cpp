@@ -32,7 +32,7 @@ TEST(ConstArrayTest, CopyConstructor1) {
 }
 
 TEST(ConstArrayTest, Constructor1) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
   EXPECT_EQ(ca.device(), aml::CPU);
   EXPECT_NE(ca.allocation(), nullptr);
@@ -44,10 +44,9 @@ TEST(ConstArrayTest, Constructor1) {
 }
 
 TEST(ConstArrayTest, Slice) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
-  aml::ConstArray<float, 2> s =
-      aml::slice(ca, aml::make_shape(1, 1), aml::make_shape(3, 4));
+  aml::ConstArray<float, 2> s = aml::slice(a, {1, 1}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::CPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -58,10 +57,9 @@ TEST(ConstArrayTest, Slice) {
 }
 
 TEST(ConstArrayTest, ContiguousSlice) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
-  aml::ConstArray<float, 2> s =
-      aml::slice(ca, aml::make_shape(0, 2), aml::make_shape(3, 4));
+  aml::ConstArray<float, 2> s = aml::slice(a, {0, 2}, {3, 4});
 
   EXPECT_EQ(s.device(), aml::CPU);
   EXPECT_EQ(s.allocation(), a.allocation());
@@ -72,10 +70,9 @@ TEST(ConstArrayTest, ContiguousSlice) {
 }
 
 TEST(ConstArrayTest, Reshape) {
-  aml::Array<float, 2> a(aml::CPU, aml::make_shape(3, 4));
+  aml::Array<float, 2> a(aml::CPU, {3, 4});
   aml::ConstArray<float, 2> ca(a);
-  aml::ConstArray<float, 3> r =
-      aml::reshape(ca, aml::make_shape(6, 2, 1));
+  aml::ConstArray<float, 3> r = aml::reshape<3>(ca, {6, 2, 1});
 
   EXPECT_EQ(r.device(), aml::CPU);
   EXPECT_EQ(r.allocation(), a.allocation());
