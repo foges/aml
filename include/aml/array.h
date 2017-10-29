@@ -86,7 +86,7 @@ template <typename T>
 using Matrix = Array<T, 2>;
 
 template <typename T, int Dim>
-Array<T, Dim> make_array(const std::vector<T> data, const Shape<Dim> &size) {
+Array<T, Dim> make_array(const std::vector<T> &data, const Shape<Dim> &size) {
   AML_ASSERT(data.size() == size.numel(), "Number of elements must match");
 
   Array<T, Dim> array(aml::CPU, size);
@@ -95,8 +95,15 @@ Array<T, Dim> make_array(const std::vector<T> data, const Shape<Dim> &size) {
   return array;
 }
 
+template <typename T>
+Array<T, 1> make_array(const std::vector<T> &data) {
+  return make_array<T, 1>(data, { data.size() });
+}
+
 template <typename T, int Dim>
-Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
+Array<T, Dim> slice(Array<T, Dim> &array,
+                    const Shape<Dim> &begin,
+                    const Shape<Dim> &end) {
   AML_ASSERT(begin <= array.size(), "Cannot slice outside of array");
   AML_ASSERT(end <= array.size(), "Cannot slice outside of array");
   AML_ASSERT(begin <= end, "Slice begin must come before end");
@@ -109,7 +116,7 @@ Array<T, Dim> slice(Array<T, Dim> array, Shape<Dim> begin, Shape<Dim> end) {
 }
 
 template <int DimNew, typename T, int DimOld>
-Array<T, DimNew> reshape(Array<T, DimOld> array, Shape<DimNew> size) {
+Array<T, DimNew> reshape(Array<T, DimOld> &array, const Shape<DimNew> &size) {
   AML_ASSERT(array.size().numel() == size.numel(),
       "Reshape must keep the same number of elements");
   AML_ASSERT(array.is_contiguous(),

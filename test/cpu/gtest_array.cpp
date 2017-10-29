@@ -44,6 +44,18 @@ TEST(ArrayTest, MakeArray) {
   }
 }
 
+TEST(ArrayTest, MakeArrayDefaultSize) {
+  std::vector<double> data = {4.0, 1.3, 1.4, 5.7, 6.9, 7.1};
+  aml::Array<double, 1> a = aml::make_array(data);
+
+  EXPECT_EQ(a.device(), aml::CPU);
+  EXPECT_EQ(a.size().numel(), data.size());
+  EXPECT_TRUE(a.is_contiguous());
+  for (size_t i = 0; i < data.size(); ++i) {
+    EXPECT_EQ(a.data()[i], data[i]);
+  }
+}
+
 TEST(ArrayTest, Slice) {
   aml::Array<float, 2> a(aml::CPU, {3, 4});
   aml::Array<float, 2> s = aml::slice(a, {1, 1}, {3, 4});
