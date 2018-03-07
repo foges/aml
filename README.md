@@ -23,7 +23,7 @@ AML aims to be as transparent as possible. This means two things
 
  - Before calling any math-heavy functions, you need to initialize a handle and
    pass it around (the handle primarily carries other CUDA handles)
- - Functions never return new arrays, you always need to initialize it manually
+ - Functions never return new arrays, you always need to initialize them manually
 
 # Example
 
