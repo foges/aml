@@ -101,6 +101,22 @@ Array<T, 1> make_array(const std::vector<T> &data) {
 }
 
 template <typename T, int Dim>
+Array<T, Dim> make_array(const std::initializer_list<T> &data,
+                         const Shape<Dim> &size) {
+  AML_ASSERT(data.size() == size.numel(), "Number of elements must match");
+
+  Array<T, Dim> array(aml::CPU, size);
+  std::copy(data.begin(), data.end(), array.data());
+
+  return array;
+}
+
+template <typename T>
+Array<T, 1> make_array(const std::initializer_list<T> &data) {
+  return make_array<T, 1>(data, { data.size() });
+}
+
+template <typename T, int Dim>
 Array<T, Dim> slice(Array<T, Dim> &array,
                     const Shape<Dim> &begin,
                     const Shape<Dim> &end) {
