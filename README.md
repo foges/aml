@@ -29,7 +29,6 @@ AML aims to be as transparent as possible. This means two things
 
 Vectorized code
 ```c++
-#include <gtest/gtest.h>
 #include <assert.h>
 
 #include <aml/aml.h>
