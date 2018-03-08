@@ -33,16 +33,16 @@ Vectorized code
 
 #include <aml/aml.h>
 
-TEST(SomeTest, Empty) {
+int main() {
   // Setup
   aml::Handle h;
   h.init();
 
-  auto x = aml::make_array({1, 1});
+  auto x = aml::make_array({2, 1});
   auto y = aml::make_array({1, 8});
   auto z = aml::make_array({0, 0});
   aml::eval(h, z, aml::max(x, y));
-  assert(z.data()[0] == 1 && z.data()[1] == 8);
+  assert(z.data()[0] == 2 && z.data()[1] == 8);
 
   // Teardown
   h.destroy();
