@@ -14,7 +14,7 @@ Some reasons to use AML:
    the CPU or GPU and AML will take care of making sure your code is executed on
    the right device.
  - Operations can be expressed elegantly in vector form, such as `x + y` or
-   `max(x, y)`.
+   `max(x, y)`, and will be lazily evaluated.
  - It takes care of memory management.
 
 # Usage
