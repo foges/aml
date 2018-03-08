@@ -38,11 +38,11 @@ int main() {
   aml::Handle h;
   h.init();
 
-  auto x = aml::make_array({2, 1});
+  auto x = aml::make_array({3, 4});
   auto y = aml::make_array({1, 8});
-  auto z = aml::make_array({0, 0});
-  aml::eval(h, z, aml::max(x, y));
-  assert(z.data()[0] == 2 && z.data()[1] == 8);
+  auto z = aml::make_array({2, 1});
+  aml::eval(h, z, aml::max(x, y) * z);
+  assert(z.data()[0] == 6 && z.data()[1] == 8);
 
   // Teardown
   h.destroy();
